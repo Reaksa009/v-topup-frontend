@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { User, Phone, Mail, Lock, ShieldCheck, KeyRound } from 'lucide-react';
+import { User, Phone, Mail, Lock, ShieldCheck, KeyRound, Wallet, ShoppingBag, Tag, Bell, Cpu, Sparkles } from 'lucide-react';
 import { message } from 'antd';
+import { motion } from 'framer-motion';
 
 const Profile = () => {
   const { user, updateProfile, changePassword, isAuthenticated } = useAuth();
@@ -77,162 +78,203 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-left">
-      <h1 className="text-3xl font-black text-white mb-8">{t('profile')}</h1>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-left bg-[#050816] text-white min-h-screen relative"
+    >
+      {/* Glow decorations */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-[140px] pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/5 rounded-full blur-[140px] pointer-events-none"></div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* Left Col - Card Info */}
-        <div className="lg:col-span-1 bg-slate-900/40 border border-slate-850 rounded-2xl p-6 text-center flex flex-col items-center">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-2xl font-extrabold text-white mb-4">
-            {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+      <h1 className="text-2xl md:text-4xl font-black text-white mb-8 uppercase tracking-wider">Gamer Profile</h1>
+
+      {/* KPI Cards / Statistics Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        
+        {/* Wallet balance */}
+        <div className="card-glass p-5 flex items-center gap-4">
+          <div className="p-3 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-xl">
+            <Wallet size={20} />
           </div>
-          <h2 className="text-white font-bold text-lg">{user?.name}</h2>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400 mt-2 capitalize">
-            {user?.role} Account
-          </span>
-          
-          <div className="h-px bg-slate-850 w-full my-6"></div>
-
-          <div className="w-full text-xs text-slate-500 space-y-2.5">
-            <p className="flex justify-between">
-              <span>Registration email:</span>
-              <span className="text-slate-300 truncate max-w-[150px]">{user?.email}</span>
-            </p>
-            <p className="flex justify-between">
-              <span>Account Status:</span>
-              <span className="text-emerald-500 flex items-center gap-1">
-                <ShieldCheck size={12} /> Active
-              </span>
-            </p>
+          <div className="text-left">
+            <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Wallet Balance</p>
+            <p className="text-white font-extrabold text-sm md:text-base mt-0.5">$25.80</p>
           </div>
         </div>
 
-        {/* Right Columns - Inputs Edit */}
+        {/* Total orders */}
+        <div className="card-glass p-5 flex items-center gap-4">
+          <div className="p-3 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-xl">
+            <ShoppingCart size={20} />
+          </div>
+          <div className="text-left">
+            <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Total Orders</p>
+            <p className="text-white font-extrabold text-sm md:text-base mt-0.5">12 orders</p>
+          </div>
+        </div>
+
+        {/* Coupons */}
+        <div className="card-glass p-5 flex items-center gap-4">
+          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl">
+            <Tag size={20} />
+          </div>
+          <div className="text-left">
+            <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Active Coupons</p>
+            <p className="text-white font-extrabold text-sm md:text-base mt-0.5">3 Available</p>
+          </div>
+        </div>
+
+        {/* Notifications */}
+        <div className="card-glass p-5 flex items-center gap-4">
+          <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl">
+            <Bell size={20} />
+          </div>
+          <div className="text-left">
+            <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Notifications</p>
+            <p className="text-white font-extrabold text-sm md:text-base mt-0.5">0 Unread</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        
+        {/* Left Column: Account Specks */}
+        <div className="lg:col-span-1 card-glass p-6 text-center flex flex-col items-center">
+          <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-2xl font-extrabold text-white mb-4 shadow-lg shadow-blue-500/10">
+            {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+            <span className="absolute -bottom-1 -right-1 h-4 w-4 bg-emerald-500 rounded-full border border-[#050816]" />
+          </div>
+          <h2 className="text-white font-bold text-lg">{user?.name}</h2>
+          <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-blue-500/10 border border-blue-500/20 text-blue-400 mt-2">
+            <Sparkles size={10} /> {user?.role || 'Member'} Rank
+          </span>
+          
+          <div className="h-px bg-white/5 w-full my-6"></div>
+
+          <div className="w-full text-xs text-slate-500 space-y-3">
+            <div className="flex justify-between">
+              <span>Account Email:</span>
+              <span className="text-slate-300 truncate max-w-[150px] font-bold">{user?.email}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Active Status:</span>
+              <span className="text-emerald-400 font-bold flex items-center gap-1">
+                <ShieldCheck size={12} /> Active Secured
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Columns: Forms */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Edit Profile details */}
-          <form onSubmit={handleUpdateProfile} className="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 space-y-5">
-            <h3 className="text-white font-bold text-base flex items-center gap-2">
-              <User size={18} className="text-blue-500" />
-              {t('edit_profile')}
+          
+          {/* Update Profile specifications */}
+          <form onSubmit={handleUpdateProfile} className="card-glass p-6 space-y-5">
+            <h3 className="text-white font-bold text-base flex items-center gap-2 border-b border-white/5 pb-3">
+              <User size={18} className="text-blue-500" /> Account Settings
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-slate-400 text-xs font-bold uppercase tracking-wider">{t('full_name')}</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-3.5 text-slate-600" size={16} />
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-850 rounded-xl pl-11 pr-4 h-12 text-sm text-white focus:outline-none focus:border-blue-500 transition-smooth"
-                    required
-                  />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              <div className="flex flex-col gap-2">
+                <label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">{t('full_name')}</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-[#050816] border border-white/5 rounded-xl px-4 h-12 text-sm text-white focus:outline-none focus:border-blue-500 transition-all font-semibold"
+                  required
+                />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-slate-400 text-xs font-bold uppercase tracking-wider">{t('phone')}</label>
-                <div className="relative">
-                  <Phone className="absolute left-4 top-3.5 text-slate-600" size={16} />
-                  <input
-                    type="text"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-850 rounded-xl pl-11 pr-4 h-12 text-sm text-white focus:outline-none focus:border-blue-500 transition-smooth"
-                    required
-                  />
-                </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">{t('phone')}</label>
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full bg-[#050816] border border-white/5 rounded-xl px-4 h-12 text-sm text-white focus:outline-none focus:border-blue-500 transition-all font-semibold"
+                  required
+                />
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-slate-550 text-xs font-bold uppercase tracking-wider">Email Address (Read-only)</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-3.5 text-slate-800" size={16} />
-                <input
-                  type="email"
-                  value={user?.email || ''}
-                  className="w-full bg-slate-950 border border-slate-900 rounded-xl pl-11 pr-4 h-12 text-sm text-slate-600 cursor-not-allowed"
-                  disabled
-                />
-              </div>
+            <div className="flex flex-col gap-2 text-left">
+              <label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Email Address (Read-only)</label>
+              <input
+                type="email"
+                value={user?.email || ''}
+                className="w-full bg-[#050816]/40 border border-white/5 text-slate-500 rounded-xl px-4 h-12 text-sm cursor-not-allowed font-semibold"
+                disabled
+              />
             </div>
 
             <button
               type="submit"
               disabled={savingProfile}
-              className="px-6 h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-smooth text-sm active:scale-98 disabled:opacity-50"
+              className="btn-premium px-6 h-12 text-xs uppercase tracking-widest disabled:opacity-50"
             >
               {savingProfile ? t('loading') : t('save_changes')}
             </button>
           </form>
 
-          {/* Change Password */}
-          <form onSubmit={handleUpdatePassword} className="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 space-y-5">
-            <h3 className="text-white font-bold text-base flex items-center gap-2">
-              <KeyRound size={18} className="text-blue-500" />
-              {t('change_password')}
+          {/* Change Password settings form */}
+          <form onSubmit={handleUpdatePassword} className="card-glass p-6 space-y-5">
+            <h3 className="text-white font-bold text-base flex items-center gap-2 border-b border-white/5 pb-3">
+              <KeyRound size={18} className="text-purple-500" /> Update Security Credentials
             </h3>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-slate-400 text-xs font-bold uppercase tracking-wider">Current Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-3.5 text-slate-600" size={16} />
+            <div className="flex flex-col gap-2 text-left">
+              <label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Current Password</label>
+              <input
+                type="password"
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                className="w-full bg-[#050816] border border-white/5 rounded-xl px-4 h-12 text-sm text-white focus:outline-none focus:border-blue-500 transition-all placeholder-slate-650"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              <div className="flex flex-col gap-2">
+                <label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">New Password</label>
                 <input
                   type="password"
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 rounded-xl pl-11 pr-4 h-12 text-sm text-white focus:outline-none focus:border-blue-500 transition-smooth"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-[#050816] border border-white/5 rounded-xl px-4 h-12 text-sm text-white focus:outline-none focus:border-blue-500 transition-all placeholder-slate-650"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Confirm New Password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full bg-[#050816] border border-white/5 rounded-xl px-4 h-12 text-sm text-white focus:outline-none focus:border-blue-500 transition-all placeholder-slate-650"
                   placeholder="••••••••"
                   required
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-slate-400 text-xs font-bold uppercase tracking-wider">New Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-3.5 text-slate-600" size={16} />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-850 rounded-xl pl-11 pr-4 h-12 text-sm text-white focus:outline-none focus:border-blue-500 transition-smooth"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-slate-400 text-xs font-bold uppercase tracking-wider">Confirm New Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-3.5 text-slate-600" size={16} />
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-850 rounded-xl pl-11 pr-4 h-12 text-sm text-white focus:outline-none focus:border-blue-500 transition-smooth"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
             <button
               type="submit"
               disabled={savingPassword}
-              className="px-6 h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-smooth text-sm active:scale-98 disabled:opacity-50"
+              className="btn-premium px-6 h-12 text-xs uppercase tracking-widest disabled:opacity-50"
             >
               {savingPassword ? t('loading') : t('change_password')}
             </button>
           </form>
+
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

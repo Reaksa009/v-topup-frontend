@@ -5,21 +5,48 @@ const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
-    return savedTheme ? savedTheme : 'dark'; // Default to dark mode
+    // Default to 'system' or fallback to 'dark'
+    return savedTheme ? savedTheme : 'system';
   });
 
   useEffect(() => {
     const root = window.document.body;
-    if (theme === 'light') {
-      root.classList.add('light-mode');
-    } else {
-      root.classList.remove('light-mode');
-    }
+    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const applyTheme = () => {
+      let isDark = false;
+      if (theme === 'system') {
+        isDark = darkQuery.matches;
+      } else {
+        isDark = theme === 'dark';
+      }
+
+      if (isDark) {
+        root.classList.add('dark-mode');
+        root.classList.remove('light-mode');
+      } else {
+        root.classList.add('light-mode');
+        root.classList.remove('dark-mode');
+      }
+    };
+
+    applyTheme();
     localStorage.setItem('theme', theme);
+
+    // Listen to OS theme changes if 'system' theme is active
+    if (theme === 'system') {
+      const listener = () => applyTheme();
+      darkQuery.addEventListener('change', listener);
+      return () => darkQuery.removeEventListener('change', listener);
+    }
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    setTheme((prev) => {
+      if (prev === 'system') return 'dark';
+      if (prev === 'dark') return 'light';
+      return 'system';
+    });
   };
 
   return (

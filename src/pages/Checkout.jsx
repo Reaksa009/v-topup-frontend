@@ -4,16 +4,19 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import api from '../services/api';
-import { ShieldCheck, Upload, CreditCard, ChevronRight, CheckCircle, AlertCircle, QrCode, Copy, Clock } from 'lucide-react';
-import { message, Modal } from 'antd';
+import { Upload, CreditCard, ChevronRight, AlertCircle, QrCode, Copy, Clock, ArrowLeft, RefreshCw, Landmark, ShieldCheck, Sparkles, Check } from 'lucide-react';
+import { message } from 'antd';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Checkout = () => {
   const { cartItems, total, totalKhr, clearCart, coupon } = useCart();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { language, t } = useLanguage();
   const navigate = useNavigate();
 
-  const [paymentMethod, setPaymentMethod] = useState('khqr_bakong'); // khqr_bakong, aba_qr, wing
+  // Step stages: 'review' (Step 1), 'payment_method' (Step 2), 'gateway' (Step 3), 'failed'
+  const [step, setStep] = useState('review');
+  const [paymentMethod, setPaymentMethod] = useState('khqr_bakong'); // khqr_bakong, aba_qr, crypto
   const [receiptFile, setReceiptFile] = useState(null);
   const [receiptPreview, setReceiptPreview] = useState(null);
   const [transactionNo, setTransactionNo] = useState('');
@@ -24,23 +27,78 @@ const Checkout = () => {
   const [dynamicQrMd5, setDynamicQrMd5] = useState(null);
   const [dynamicQrLoading, setDynamicQrLoading] = useState(false);
   const [paymentVerified, setPaymentVerified] = useState(false);
-  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
-  const [qrError, setQrError] = useState(false);
 
-  const handleCopyText = (text, label) => {
-    navigator.clipboard.writeText(text);
-    message.success(`${label} copied to clipboard!`);
-  };
-
-  // Timer states for KHQR expiration
-  const [timeLeft, setTimeLeft] = useState(120);
+  // Timer states for KHQR expiration (3 minutes = 180 seconds)
+  const [timeLeft, setTimeLeft] = useState(180);
   const [qrExpired, setQrExpired] = useState(false);
 
-  useEffect(() => {
-    if (!isQrModalOpen || paymentVerified) return;
+  // Custom Localizations for Checkout and Gateway steps
+  const checkoutLabels = {
+    en: {
+      secure_payment: 'Secure Payment Gateway',
+      ssl_secure: 'SSL Secured Connection',
+      review_order: 'Order Checkout',
+      payment_selector: 'Payment Channel',
+      instant_desc: 'Scan instantly to complete purchase. Fully automated.',
+      manual_desc: 'Transfer manually and upload your bank receipt.',
+      summary: 'Billing Summary',
+      pay_amount: 'Amount to Pay',
+      waiting_payment: 'Waiting for transfer...',
+      checking: 'Checking payment status automatically...',
+      expires_soon: 'Session expiring soon',
+      expired_title: 'Payment Expired',
+      expired_desc: 'This checkout session has expired. Please regenerate your KHQR code.',
+      generate_qr: 'Regenerate QR Code',
+      back_review: 'Modify Details',
+      i_paid: "I've Transferred",
+      cancel_order: 'Cancel Payment',
+      copy_ref: 'Copy Account ID',
+      ref_id_label: 'Reference ID',
+      upload_receipt_lbl: 'Upload Receipt Screenshot',
+      confirm_checkout: 'Proceed to Payment',
+      order_id: 'Order Number',
+      failed_title: 'Payment Failed',
+      failed_desc: 'We could not verify your receipt. Please try again or contact customer support.',
+      try_again: 'Try Again',
+      contact_support: 'Contact Support',
+    },
+    kh: {
+      secure_payment: 'ច្រកទូទាត់ប្រាក់សុវត្ថិភាព',
+      ssl_secure: 'ប្រព័ន្ធសុវត្ថិភាព SSL',
+      review_order: 'ពិនិត្យមើលការទូទាត់',
+      payment_selector: 'វិធីទូទាត់ប្រាក់',
+      instant_desc: 'ស្កេនបង់ប្រាក់ភ្លាមៗ។ ដំណើរការស្វ័យប្រវត្ត។',
+      manual_desc: 'ផ្ទេរប្រាក់ដោយដៃ រួចបង្ហោះរូបភាពវិក្កយបត្របង់ប្រាក់។',
+      summary: 'សេចក្តីសង្ខេបការបញ្ជាទិញ',
+      pay_amount: 'ចំនួនទឹកប្រាក់ត្រូវបង់',
+      waiting_payment: 'កំពុងរង់ចាំការទូទាត់...',
+      checking: 'កំពុងផ្ទៀងផ្ទាត់ដោយស្វ័យប្រវត្ត...',
+      expires_soon: 'ជិតផុតកំណត់ហើយ',
+      expired_title: 'ការទូទាត់បានផុតកំណត់',
+      expired_desc: 'វគ្គទូទាត់ប្រាក់នេះបានផុតកំណត់។ សូមបង្កើត QR សារជាថ្មី។',
+      generate_qr: 'បង្កើត QR ថ្មី',
+      back_review: 'កែសម្រួលព័ត៌មាន',
+      i_paid: 'ខ្ញុំបានបង់ប្រាក់រួចហើយ',
+      cancel_order: 'បោះបង់ការទូទាត់',
+      copy_ref: 'ចម្លងលេខគណនី',
+      ref_id_label: 'លេខកូដប្រតិបត្តិការ',
+      upload_receipt_lbl: 'បង្ហោះរូបភាពវិក្កយបត្រ',
+      confirm_checkout: 'បន្តទៅកាន់ការបង់ប្រាក់',
+      order_id: 'លេខការបញ្ជាទិញ',
+      failed_title: 'ការទូទាត់បរាជ័យ',
+      failed_desc: 'យើងមិនអាចផ្ទៀងផ្ទាត់ការបង់ប្រាក់របស់អ្នកបានទេ។ សូមព្យាយាមម្តងទៀត ឬទាក់ទងផ្នែកគាំទ្រ។',
+      try_again: 'ព្យាយាមម្តងទៀត',
+      contact_support: 'ទាក់ទងផ្នែកគាំទ្រ',
+    }
+  };
 
-    setTimeLeft(120);
-    setQrExpired(false);
+  const cl = (key) => {
+    return checkoutLabels[language]?.[key] || checkoutLabels['en']?.[key] || key;
+  };
+
+  // Expiration countdown timer
+  useEffect(() => {
+    if (step !== 'gateway' || paymentVerified || qrExpired || paymentMethod !== 'khqr_bakong') return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -54,7 +112,7 @@ const Checkout = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isQrModalOpen, paymentVerified]);
+  }, [step, paymentVerified, qrExpired, paymentMethod]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -62,9 +120,23 @@ const Checkout = () => {
     return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleCopyText = (text, label) => {
+    navigator.clipboard.writeText(text);
+    message.success(`${label} copied!`);
+  };
+
+  // Reset QR state if dependencies change
+  useEffect(() => {
+    setDynamicQrUrl(null);
+    setQrExpired(false);
+    setTimeLeft(180);
+  }, [paymentMethod, cartItems, coupon]);
+
+  // Fetch dynamic KHQR code
   const fetchDynamicKhqr = async () => {
     setDynamicQrLoading(true);
-    setQrError(false);
+    setQrExpired(false);
+    setTimeLeft(180);
     try {
       const itemsPayload = cartItems.map((item) => ({
         game_id: item.game.id,
@@ -87,13 +159,13 @@ const Checkout = () => {
       console.error('Failed to generate dynamic KHQR:', err);
       const errMsg = err.response?.data?.message || 'Failed to generate dynamic KHQR.';
       message.error(errMsg);
-      setQrError(true);
-      throw err;
+      setStep('failed');
     } finally {
       setDynamicQrLoading(false);
     }
   };
 
+  // Automated confirmation checkout submitting
   const submitOrderAfterVerification = async (tranNo) => {
     setSubmitting(true);
     try {
@@ -120,34 +192,24 @@ const Checkout = () => {
       });
 
       if (res.data?.success) {
-        message.success('Order placed successfully! Payment verified.');
         clearCart();
-        navigate('/orders');
+        navigate(`/success?order_no=${res.data.data.order_no}`);
       } else {
         message.error(res.data?.message || 'Failed to place order.');
+        setStep('failed');
       }
     } catch (err) {
       console.error(err);
       message.error('Failed to submit order after verification.');
+      setStep('failed');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Reset QR error and QR URL when checkout inputs change
+  // Auto payment polling verification every 5 seconds
   useEffect(() => {
-    setDynamicQrUrl('');
-    setQrError(false);
-  }, [paymentMethod, cartItems, coupon]);
-
-  useEffect(() => {
-    if (isAuthenticated && paymentMethod === 'khqr_bakong' && !dynamicQrUrl && !dynamicQrLoading && !qrError && cartItems.length > 0) {
-      fetchDynamicKhqr().catch(() => {});
-    }
-  }, [isAuthenticated, paymentMethod, cartItems, coupon, dynamicQrUrl, dynamicQrLoading, qrError]);
-
-  useEffect(() => {
-    if (!dynamicQrMd5 || paymentVerified || qrExpired) return;
+    if (step !== 'gateway' || !dynamicQrMd5 || paymentVerified || qrExpired || paymentMethod !== 'khqr_bakong') return;
 
     const interval = setInterval(async () => {
       try {
@@ -156,41 +218,85 @@ const Checkout = () => {
           const statusData = res.data.data;
           if (statusData.verified === true || statusData.status === 'SUCCESS' || statusData.responseCode === 0) {
             setPaymentVerified(true);
-            setIsQrModalOpen(false);
-            message.success('Payment verified! Placing order...');
-            submitOrderAfterVerification(statusData.tran || 'KHQR-PAID');
+            clearInterval(interval);
+            message.success('Payment verified! Finalizing order...');
+            await submitOrderAfterVerification(statusData.tran || 'KHQR-PAID');
           }
         }
       } catch (err) {
         console.error('Failed to check payment status:', err);
       }
-    }, 3000);
+    }, 5000); // Polling status check every 5 seconds
 
     return () => clearInterval(interval);
-  }, [dynamicQrMd5, paymentVerified, qrExpired, cartItems, coupon, navigate]);
+  }, [step, dynamicQrMd5, paymentVerified, qrExpired, paymentMethod]);
 
-  // Auth Guard
-  useEffect(() => {
-    if (!isAuthenticated) {
-      message.warning({
-        content: 'Please login to complete your checkout.',
-        key: 'checkout_login_warning'
-      });
-      navigate('/login');
+  const handleProceedToPayment = async (e) => {
+    e.preventDefault();
+    if (paymentMethod === 'khqr_bakong') {
+      setStep('gateway');
+      await fetchDynamicKhqr();
+    } else if (paymentMethod === 'aba_qr') {
+      setStep('gateway');
+    } else {
+      message.info('Crypto Payment option is coming soon!');
     }
-  }, [isAuthenticated, navigate]);
+  };
 
-  if (cartItems.length === 0) {
-    return (
-      <div className="max-w-md mx-auto min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
-        <AlertCircle size={48} className="text-slate-600 mb-4" />
-        <h2 className="text-xl font-bold text-slate-300 mb-2">No items to checkout</h2>
-        <Link to="/games" className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl mt-4">
-          Browse Games
-        </Link>
-      </div>
-    );
-  }
+  // Manual payment submission (ABA / Receipt upload)
+  const handleManualCheckoutSubmit = async (e) => {
+    e.preventDefault();
+    if (!receiptFile) {
+      message.error('Please upload your payment receipt.');
+      return;
+    }
+    if (!transactionNo.trim()) {
+      message.error('Please enter the transaction reference ID.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('payment_method', paymentMethod);
+      formData.append('transaction_no', transactionNo);
+      if (receiptFile) {
+        formData.append('receipt', receiptFile);
+      }
+      if (coupon) {
+        formData.append('coupon_code', coupon.code);
+      }
+      
+      const itemsPayload = cartItems.map((item) => ({
+        game_id: item.game.id,
+        package_id: item.packageItem.id,
+        player_id: item.playerId,
+        server_id: item.serverId,
+        qty: item.qty
+      }));
+      formData.append('items', JSON.stringify(itemsPayload));
+
+      const res = await api.post('/orders/checkout', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (res.data?.success) {
+        clearCart();
+        navigate(`/success?order_no=${res.data.data.order_no}`);
+      } else {
+        message.error(res.data?.message || 'Failed to place order.');
+        setStep('failed');
+      }
+    } catch (err) {
+      console.error(err);
+      message.error('Failed to place manual order.');
+      setStep('failed');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -209,572 +315,465 @@ const Checkout = () => {
     }
   };
 
-  const handleCheckoutSubmit = async (e) => {
-    e.preventDefault();
-    if (!paymentMethod) {
-      message.error('Please select a payment method.');
-      return;
-    }
-
-    if (paymentMethod === 'khqr_bakong') {
-      if (!paymentVerified) {
-        if (!dynamicQrUrl) {
-          try {
-            await fetchDynamicKhqr();
-            setIsQrModalOpen(true);
-          } catch (err) {
-            // Prevent opening modal on failure (e.g. out of stock)
-          }
-        } else {
-          setIsQrModalOpen(true);
-        }
-        return;
-      } else {
-        submitOrderAfterVerification(transactionNo || 'KHQR-PAID');
-        return;
-      }
-    }
-
-    // Manual flow for other payment methods (ABA / Wing)
-    if (!receiptFile) {
-      message.error('Please upload your payment receipt.');
-      return;
-    }
-    if (!transactionNo.trim()) {
-      message.error('Please enter the transaction reference ID.');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      // 1. Create Order and Payment
-      const formData = new FormData();
-      formData.append('payment_method', paymentMethod);
-      formData.append('transaction_no', transactionNo);
-      if (receiptFile) {
-        formData.append('receipt', receiptFile);
-      }
-      if (coupon) {
-        formData.append('coupon_code', coupon.code);
-      }
-      
-      // Items payload structured as JSON string
-      const itemsPayload = cartItems.map((item) => ({
-        game_id: item.game.id,
-        package_id: item.packageItem.id,
-        player_id: item.playerId,
-        server_id: item.serverId,
-        qty: item.qty
-      }));
-      
-      formData.append('items', JSON.stringify(itemsPayload));
-
-      const res = await api.post('/orders/checkout', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
-      if (res.data?.success) {
-        message.success('Order placed successfully! Pending admin verification.');
-        clearCart();
-        navigate('/orders');
-      } else {
-        message.error(res.data?.message || 'Failed to place order.');
-      }
-    } catch (err) {
-      console.error(err);
-      // Mocking order creation locally in case API is offline during initial frontend testing
-      message.success('(Simulation Mode) Order placed successfully! (Local Fallback)');
-      clearCart();
-      navigate('/orders');
-    } finally {
-      setSubmitting(false);
-    }
+  const handleCancelOrder = () => {
+    setStep('review');
+    setReceiptFile(null);
+    setReceiptPreview(null);
+    setTransactionNo('');
+    setPaymentVerified(false);
+    setQrExpired(false);
+    setTimeLeft(180);
+    message.info('Payment cancelled.');
   };
 
-  // Helper to render inline vector bank logos (completely self-contained, no network dependency)
-  const renderPaymentLogo = (method) => {
-    switch (method) {
-      case 'khqr_bakong':
-        return (
-          <img src="/bakong_logo.jpg" alt="Bakong KHQR" className="h-full w-full object-cover rounded-lg" />
-        );
-      case 'aba_qr':
-        return (
-          <img src="/aba_logo.png" alt="ABA PAY" className="h-full w-full object-cover rounded-lg" />
-        );
-      default:
-        return null;
-    }
-  };
+  if (cartItems.length === 0) {
+    return (
+      <div className="max-w-md mx-auto min-h-[60vh] flex flex-col items-center justify-center text-center px-4 bg-[#050816] text-white">
+        <AlertCircle size={48} className="text-slate-500 mb-4 animate-bounce" />
+        <h2 className="text-xl font-bold text-slate-350 mb-2">No items to checkout</h2>
+        <Link to="/games" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl mt-4">
+          Browse Games
+        </Link>
+      </div>
+    );
+  }
 
-  // Payment configuration
-  const PAYMENT_DETAILS = {
-    khqr_bakong: {
-      name: 'KHQR Bakong (Any Bank)',
-      accountName: 'VUTHY REAKSA',
-      accountNumber: 'vuthy_reaksa@bkrt',
-      qrImage: dynamicQrUrl || 'https://images.unsplash.com/photo-1595079676339-1534801ad6cf?w=400&auto=format&fit=crop&q=80', // Dynamic or fallback mock QR code
-      colorClass: 'border-red-500/30 bg-red-950/5'
-    },
-    aba_qr: {
-      name: 'ABA PAY',
-      accountName: 'V-TOPUP-STORE CO., LTD.',
-      accountNumber: '000 789 654',
-      qrImage: 'https://images.unsplash.com/photo-1595079676339-1534801ad6cf?w=400&auto=format&fit=crop&q=80',
-      colorClass: 'border-blue-500/30 bg-blue-950/5'
-    }
-  };
+  // Calculate pricing values
+  const processFee = 0.10; // $0.10 processing fee
+  const orderSubtotal = total;
+  const discountAmount = total * (coupon ? 0.10 : 0);
+  const orderTotal = orderSubtotal + processFee - discountAmount;
+  const totalKHR = Math.round(orderTotal * 4100);
 
-  const activePayment = PAYMENT_DETAILS[paymentMethod];
+  // Timeline Step Tracker helper values
+  const getStepStatus = (itemStep) => {
+    if (step === 'review') return itemStep === 1 ? 'active' : 'upcoming';
+    if (step === 'payment_method') return itemStep === 2 ? 'active' : itemStep === 1 ? 'completed' : 'upcoming';
+    if (step === 'gateway') return itemStep === 3 ? 'active' : 'completed';
+    return 'upcoming';
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-left">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-slate-500 text-xs mb-8">
-        <Link to="/cart" className="hover:text-white transition-smooth">Cart</Link>
-        <ChevronRight size={12} />
-        <span className="text-slate-300">Checkout</span>
-      </div>
-
-      <h1 className="text-3xl font-black text-white mb-8">{t('checkout')}</h1>
-
-      <form onSubmit={handleCheckoutSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* Left Columns - Pay info & Receipt upload */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Step 1: Select Pay Method */}
-          <div className="bg-slate-900/25 backdrop-blur-md border border-slate-850/60 rounded-3xl p-8 relative overflow-hidden shadow-2xl">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 rounded-full blur-[60px] pointer-events-none"></div>
-            
-            <div className="flex items-center gap-2.5 mb-6">
-              <span className="bg-blue-500/10 text-blue-400 p-2 rounded-xl border border-blue-500/15">
-                <CreditCard size={18} />
-              </span>
-              <div>
-                <h3 className="text-white font-black text-lg tracking-tight">{t('payment_method')}</h3>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Secure Gateway Selector</p>
-              </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="max-w-5xl mx-auto px-4 md:px-8 py-12 text-left bg-[#050816] text-white min-h-screen"
+    >
+      {/* 3-Step Premium Checkout Timeline Tracker */}
+      <div className="w-full max-w-xl mx-auto mb-10 select-none">
+        <div className="flex justify-between items-center relative">
+          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/5 -translate-y-1/2 z-0"></div>
+          
+          {/* Step 1 */}
+          <div className="relative z-10 flex flex-col items-center gap-2">
+            <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs border ${
+              getStepStatus(1) === 'completed'
+                ? 'bg-emerald-500 border-emerald-500 text-white'
+                : getStepStatus(1) === 'active'
+                ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_15px_#3B82F6]'
+                : 'bg-[#0B1023] border-white/5 text-slate-500'
+            }`}>
+              {getStepStatus(1) === 'completed' ? <Check size={14} /> : '1'}
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {Object.keys(PAYMENT_DETAILS).map((method) => {
-                const isSelected = paymentMethod === method;
-                return (
-                  <button
-                    key={method}
-                    type="button"
-                    onClick={() => setPaymentMethod(method)}
-                    className={`flex flex-col items-start p-5 border rounded-2xl transition-all duration-300 group cursor-pointer relative select-none text-left overflow-hidden ${
-                      isSelected
-                        ? 'bg-gradient-to-b from-blue-950/20 to-slate-900/50 border-blue-500 ring-2 ring-blue-500/10 shadow-lg shadow-blue-500/5'
-                        : 'bg-slate-950/30 border-slate-850/60 text-slate-450 hover:border-slate-800 hover:bg-slate-900/30'
-                    }`}
-                  >
-                    {/* Logo container with zero padding and border filling */}
-                    <div className="w-full h-24 rounded-xl overflow-hidden mb-4 relative flex items-center justify-center border border-slate-800/80 bg-slate-900/40 shadow-md group-hover:scale-[1.015] transition-transform duration-300">
-                      {renderPaymentLogo(method)}
-                    </div>
-                    
-                    <div className="space-y-1 w-full relative z-10">
-                      <div className="flex items-center justify-between">
-                        <span className="font-extrabold text-sm text-white tracking-wide">{method === 'khqr_bakong' ? 'KHQR BAKONG' : 'ABA PAY'}</span>
-                        {isSelected && (
-                          <CheckCircle size={16} className="text-blue-500 fill-blue-500/10" />
-                        )}
-                      </div>
-                      <p className="text-[10px] text-slate-500 font-medium tracking-wide uppercase">{PAYMENT_DETAILS[method].name}</p>
-                    </div>
-
-                    {/* Dynamic selection background highlight */}
-                    {isSelected && (
-                      <div className="absolute inset-0 bg-blue-500/[0.02] pointer-events-none"></div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+            <span className="text-[10px] uppercase font-black tracking-wider text-slate-400">Review</span>
           </div>
 
-          {/* Step 2: Pay details & QR */}
-          {paymentMethod === 'khqr_bakong' ? (
-            <div className="bg-slate-900/25 backdrop-blur-md border border-slate-850/60 rounded-3xl p-8 text-left relative overflow-hidden shadow-xl">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-[50px] pointer-events-none"></div>
-              
-              <div className="flex items-center gap-2.5 mb-4">
-                <span className="bg-red-500/10 text-red-400 p-2 rounded-xl border border-red-500/15">
-                  <QrCode size={18} />
-                </span>
-                <div>
-                  <h3 className="text-white font-black text-base tracking-tight">KHQR Bakong Checkout</h3>
-                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Instant Automated Processing</p>
-                </div>
-              </div>
-              
-              <p className="text-slate-400 text-xs leading-relaxed max-w-xl">
-                Clicking <strong className="text-white font-bold">Confirm Payment & Order</strong> will instantly generate a dynamic, high-security KHQR code. Simply scan and authorize the transfer using any Bakong-enabled banking app in Cambodia. The payment verifies automatically within seconds—no manual receipt upload required.
-              </p>
+          {/* Step 2 */}
+          <div className="relative z-10 flex flex-col items-center gap-2">
+            <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs border ${
+              getStepStatus(2) === 'completed'
+                ? 'bg-emerald-500 border-emerald-500 text-white'
+                : getStepStatus(2) === 'active'
+                ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_15px_#3B82F6]'
+                : 'bg-[#0B1023] border-white/5 text-slate-500'
+            }`}>
+              {getStepStatus(2) === 'completed' ? <Check size={14} /> : '2'}
             </div>
-          ) : (
-            activePayment && (
-              <div className="bg-slate-900/25 backdrop-blur-md border border-slate-850/60 rounded-3xl p-8 shadow-xl text-left relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-[50px] pointer-events-none"></div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                  {/* Text details */}
-                  <div className="space-y-5 text-left">
-                    <div className="flex items-center gap-2.5">
-                      <span className="bg-blue-500/10 text-blue-400 p-2 rounded-xl border border-blue-500/15">
-                        <CreditCard size={18} />
-                      </span>
-                      <div>
-                        <h4 className="text-white font-black text-sm tracking-tight">Transfer Details</h4>
-                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">{activePayment.name}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div className="bg-slate-950/30 border border-slate-850/50 p-4 rounded-2xl flex items-center justify-between">
-                        <div>
-                          <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Account Name</p>
-                          <p className="text-slate-100 font-black text-xs mt-0.5 uppercase tracking-wide">{activePayment.accountName}</p>
-                        </div>
-                      </div>
+            <span className="text-[10px] uppercase font-black tracking-wider text-slate-400">Channel</span>
+          </div>
 
-                      <div className="bg-slate-950/30 border border-slate-850/50 p-4 rounded-2xl flex items-center justify-between">
-                        <div>
-                          <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Account Number</p>
-                          <p className="text-white font-black text-sm mt-0.5 font-mono tracking-wider">{activePayment.accountNumber}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleCopyText(activePayment.accountNumber, 'Account Number')}
-                          className="p-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-slate-700 rounded-xl text-slate-400 hover:text-white transition-all cursor-pointer"
-                          title="Copy Account Number"
-                        >
-                          <Copy size={13} />
-                        </button>
-                      </div>
-
-                      <div className="bg-slate-950/30 border border-slate-850/50 p-4 rounded-2xl flex items-center justify-between">
-                        <div>
-                          <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Amount to Pay</p>
-                          <p className="text-blue-400 font-black text-base mt-0.5">${total.toFixed(2)}</p>
-                          <p className="text-slate-500 font-mono text-[9px] mt-0.5">{totalKhr.toLocaleString()} KHR</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleCopyText(total.toFixed(2), 'Amount')}
-                          className="p-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-slate-700 rounded-xl text-slate-400 hover:text-white transition-all cursor-pointer"
-                          title="Copy Amount"
-                        >
-                          <Copy size={13} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* QR graphic */}
-                  <div className="flex flex-col items-center justify-center bg-slate-950/40 border border-slate-850/50 p-6 rounded-2xl relative shadow-inner">
-                    <span className="text-[9px] font-black tracking-widest text-slate-500 uppercase mb-3.5">Scan to Transfer</span>
-                    <div className="relative p-2 bg-white rounded-2xl shadow-lg shadow-black/40">
-                      <img
-                        src={activePayment.qrImage}
-                        alt="QR Code"
-                        className="w-36 h-36 object-cover rounded-xl"
-                      />
-                    </div>
-                    <span className="text-[9px] text-slate-400 font-extrabold uppercase mt-3.5 tracking-widest font-mono bg-slate-900/50 px-3 py-1 rounded-full border border-slate-800/40">{activePayment.name}</span>
-                  </div>
-                </div>
-              </div>
-            )
-          )}
-
-          {/* Step 3: Upload Receipt & Ref ID */}
-          {paymentMethod !== 'khqr_bakong' && (
-            <div className="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 space-y-6">
-              <h3 className="text-white font-bold text-base">{t('upload_receipt')}</h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Receipt File */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-slate-400 text-xs font-bold uppercase tracking-wider">
-                    Payment Receipt Image { (paymentMethod === 'khqr_bakong' && paymentVerified) && <span className="text-emerald-500 font-normal lowercase ml-1">(optional)</span> }
-                  </label>
-                  <div className="relative border border-dashed border-slate-800 rounded-xl p-4 bg-slate-950/40 hover:bg-slate-950 transition-smooth text-center group cursor-pointer h-[160px] flex flex-col justify-center items-center">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="absolute inset-0 opacity-0 cursor-pointer z-20"
-                      required={paymentMethod !== 'khqr_bakong' || !paymentVerified}
-                    />
-                    {receiptPreview ? (
-                      <img
-                        src={receiptPreview}
-                        alt="Receipt preview"
-                        className="absolute inset-2 w-[calc(100%-16px)] h-[calc(100%-16px)] object-cover rounded-lg"
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center gap-2 pointer-events-none">
-                        <Upload size={24} className="text-slate-500 group-hover:text-blue-500 transition-smooth" />
-                        <span className="text-[10px] text-slate-500 px-4 leading-normal">{t('upload_hint')}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Ref ID input */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-slate-400 text-xs font-bold uppercase tracking-wider">Transaction Reference ID</label>
-                  <p className="text-[10px] text-slate-500 leading-normal">
-                    Please copy the Bank Transfer Transaction reference number/hash from your receipt and input it below.
-                  </p>
-                  <input
-                    type="text"
-                    placeholder="e.g. 192847592 or ABA-92845"
-                    value={transactionNo}
-                    onChange={(e) => setTransactionNo(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-850 rounded-xl px-4 h-12 text-sm text-white placeholder-slate-700 focus:outline-none focus:border-blue-500 transition-smooth mt-2"
-                    required
-                  />
-                </div>
-              </div>
+          {/* Step 3 */}
+          <div className="relative z-10 flex flex-col items-center gap-2">
+            <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs border ${
+              getStepStatus(3) === 'completed'
+                ? 'bg-emerald-500 border-emerald-500 text-white'
+                : getStepStatus(3) === 'active'
+                ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_15px_#3B82F6]'
+                : 'bg-[#0B1023] border-white/5 text-slate-500'
+            }`}>
+              {getStepStatus(3) === 'completed' ? <Check size={14} /> : '3'}
             </div>
-          )}
+            <span className="text-[10px] uppercase font-black tracking-wider text-slate-400">Payment</span>
+          </div>
         </div>
+      </div>
 
-        {/* Right Column - Order summary & Submit */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 space-y-5">
-            <h3 className="text-white font-bold text-base border-b border-slate-850 pb-3">{t('order_summary')}</h3>
-
-            {/* Mini Items review */}
-            <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
-              {cartItems.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-start text-xs border-b border-slate-900 pb-2.5">
-                  <div className="text-left max-w-[140px]">
-                    <p className="text-white font-bold truncate">
-                      {language === 'kh' ? item.game.name_kh : item.game.name_en}
-                    </p>
-                    <p className="text-slate-500 text-[10px] mt-0.5 truncate">
-                      {language === 'kh' ? item.packageItem.name_kh : item.packageItem.name_en}
-                    </p>
-                    <p className="text-slate-500 text-[9px] mt-0.5 font-mono">ID: {item.playerId}</p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        
+        {/* LEFT TWO COLUMNS: DYNAMIC WORKFLOW */}
+        <div className="lg:col-span-2 space-y-6">
+          
+          {/* Step 1: Review Item Details */}
+          {step === 'review' && (
+            <motion.div
+              initial={{ opacity: 0, x: -15 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="card-glass p-6 space-y-5"
+            >
+              <h2 className="text-white font-extrabold text-sm uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Sparkles size={14} className="text-blue-500" /> Confirm Purchase Item
+              </h2>
+              {cartItems.map((item) => (
+                <div key={item.id} className="flex gap-4 items-center bg-[#050816]/40 p-4 border border-white/5 rounded-2xl">
+                  <img src={item.game.logo_url} alt={item.game.name_en} className="w-14 h-14 rounded-xl object-cover border border-white/5 shrink-0" />
+                  <div className="flex-1 text-left">
+                    <h3 className="text-white font-bold text-xs sm:text-sm">{language === 'kh' ? (item.packageItem.name_kh || item.packageItem.name_en) : item.packageItem.name_en}</h3>
+                    <p className="text-[10px] text-slate-500 font-semibold uppercase mt-0.5">{item.game.name_en}</p>
+                    <div className="flex gap-4 text-[9.5px] text-blue-400 font-mono mt-1">
+                      <span>ID: {item.playerId}</span>
+                      {item.serverId && <span>Server: {item.serverId}</span>}
+                    </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-white font-semibold">${item.packageItem.price_usd} x {item.qty}</p>
-                    <p className="text-slate-500 text-[10px] mt-0.5">
-                      ${(parseFloat(item.packageItem.price_usd) * item.qty).toFixed(2)}
-                    </p>
+                  <div className="text-right">
+                    <p className="text-white font-extrabold text-xs sm:text-sm">${parseFloat(item.packageItem.price_usd).toFixed(2)}</p>
+                    <p className="text-[10px] text-slate-500">Qty: {item.qty}</p>
                   </div>
                 </div>
               ))}
-            </div>
 
-            {/* Totals */}
-            <div className="space-y-2 text-xs border-t border-slate-900 pt-3">
-              <div className="flex justify-between text-slate-500">
-                <span>Items total</span>
-                <span className="font-bold text-slate-300">${total.toFixed(2)}</span>
+              <div className="pt-4 flex justify-end">
+                <button
+                  onClick={() => setStep('payment_method')}
+                  className="btn-premium px-8 h-11 text-xs uppercase tracking-widest"
+                >
+                  Continue to Payment Channel
+                </button>
               </div>
-              <div className="flex justify-between text-white border-t border-slate-900 pt-2 items-baseline">
-                <span className="font-black text-sm">{t('total')}</span>
-                <div className="text-right">
-                  <span className="text-blue-500 font-black text-lg">${total.toFixed(2)}</span>
-                  <p className="text-slate-500 text-[9px] font-mono mt-0.5">{totalKhr.toLocaleString()} KHR</p>
+            </motion.div>
+          )}
+
+          {/* Step 2: Select Payment Method Option */}
+          {step === 'payment_method' && (
+            <motion.div
+              initial={{ opacity: 0, x: -15 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="card-glass p-6 space-y-6"
+            >
+              <h2 className="text-white font-extrabold text-sm uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <CreditCard size={15} className="text-purple-500" /> Choose Payment Channel
+              </h2>
+
+              <div className="grid grid-cols-1 gap-4">
+                {/* Bakong Option */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('khqr_bakong')}
+                  className={`flex items-center justify-between p-4 border rounded-2xl text-left transition-all ${
+                    paymentMethod === 'khqr_bakong'
+                      ? 'bg-blue-600/10 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/20'
+                      : 'bg-[#050816]/40 border-white/5 hover:border-white/10 hover:bg-[#151e43]/20'
+                  }`}
+                >
+                  <div className="flex items-center gap-3.5">
+                    <img src="/bakong_logo.jpg" alt="Bakong" className="w-9 h-9 rounded-lg object-cover" />
+                    <div>
+                      <h4 className="text-white font-bold text-xs uppercase tracking-wider">Bakong KHQR</h4>
+                      <p className="text-[10px] text-slate-500 mt-0.5">Automated instant status validation loop.</p>
+                    </div>
+                  </div>
+                  {paymentMethod === 'khqr_bakong' && <span className="h-5 w-5 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-[9px]">✓</span>}
+                </button>
+
+                {/* ABA Option */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('aba_qr')}
+                  className={`flex items-center justify-between p-4 border rounded-2xl text-left transition-all ${
+                    paymentMethod === 'aba_qr'
+                      ? 'bg-blue-600/10 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/20'
+                      : 'bg-[#050816]/40 border-white/5 hover:border-white/10 hover:bg-[#151e43]/20'
+                  }`}
+                >
+                  <div className="flex items-center gap-3.5">
+                    <img src="/aba_logo.png" alt="ABA" className="w-9 h-9 rounded-lg object-cover" />
+                    <div>
+                      <h4 className="text-white font-bold text-xs uppercase tracking-wider">ABA PayWay</h4>
+                      <p className="text-[10px] text-slate-500 mt-0.5">Manual reference validation upload.</p>
+                    </div>
+                  </div>
+                  {paymentMethod === 'aba_qr' && <span className="h-5 w-5 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-[9px]">✓</span>}
+                </button>
+
+                {/* Crypto Option - Coming Soon */}
+                <button
+                  type="button"
+                  disabled
+                  className="flex items-center justify-between p-4 border border-white/3 bg-white/2 rounded-2xl text-left opacity-40 cursor-not-allowed"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-9 h-9 rounded-lg bg-slate-900 border border-white/5 flex items-center justify-center text-slate-500 font-bold text-xs uppercase">BTC</div>
+                    <div>
+                      <h4 className="text-slate-550 font-bold text-xs uppercase tracking-wider">Crypto Token Wallet</h4>
+                      <p className="text-[9px] text-slate-600 mt-0.5">Bitcoin, USDT, Ethereum (Coming Soon)</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              <div className="pt-4 flex justify-between">
+                <button
+                  onClick={() => setStep('review')}
+                  className="px-5 h-11 text-xs uppercase tracking-widest text-slate-400 hover:text-white border border-white/5 rounded-xl"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={handleProceedToPayment}
+                  className="btn-premium px-8 h-11 text-xs uppercase tracking-widest"
+                >
+                  Proceed to Payment
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Step 3: Secure Scan & Pay Verification Screen */}
+          {step === 'gateway' && (
+            <motion.div
+              initial={{ opacity: 0, x: -15 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="card-glass p-6 md:p-8 space-y-6 text-center"
+            >
+              <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                <button
+                  onClick={handleCancelOrder}
+                  className="text-slate-400 hover:text-white text-xs font-bold uppercase tracking-wider cursor-pointer"
+                >
+                  {cl('cancel_order')}
+                </button>
+                <span className="text-[10px] text-slate-500 uppercase tracking-widest font-black flex items-center gap-1">
+                  <ShieldCheck size={12} className="text-emerald-500 animate-pulse" /> Secure Payment Gateway
+                </span>
+              </div>
+
+              {/* Dynamic KHQR Option Interface */}
+              {paymentMethod === 'khqr_bakong' && (
+                <div className="space-y-6 flex flex-col items-center">
+                  
+                  {dynamicQrLoading ? (
+                    <div className="h-48 w-48 flex flex-col items-center justify-center space-y-3 bg-[#050816] border border-white/5 rounded-2xl">
+                      <RefreshCw size={24} className="animate-spin text-blue-500" />
+                      <p className="text-[10px] text-slate-500 font-bold uppercase">Generating KHQR...</p>
+                    </div>
+                  ) : qrExpired ? (
+                    <div className="max-w-xs space-y-4 p-6 bg-red-950/20 border border-red-900/30 rounded-2xl text-center">
+                      <AlertCircle size={28} className="text-red-500 mx-auto" />
+                      <h4 className="text-white font-bold text-xs uppercase tracking-wider">{cl('expired_title')}</h4>
+                      <p className="text-[11px] text-slate-400 leading-relaxed">{cl('expired_desc')}</p>
+                      <button
+                        onClick={fetchDynamicKhqr}
+                        className="btn-premium px-5 h-9 text-[10px] uppercase tracking-wider"
+                      >
+                        {cl('generate_qr')}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-6 flex flex-col items-center">
+                      
+                      {/* Circle timer and code details */}
+                      <div className="relative h-20 w-20 flex items-center justify-center">
+                        <svg className="absolute inset-0 transform -rotate-90" viewBox="0 0 80 80">
+                          <circle cx="40" cy="40" r="35" stroke="rgba(255,255,255,0.05)" strokeWidth="3.5" fill="none" />
+                          <circle
+                            cx="40"
+                            cy="40"
+                            r="35"
+                            stroke="#3B82F6"
+                            strokeWidth="3.5"
+                            fill="none"
+                            strokeDasharray={219.9}
+                            strokeDashoffset={219.9 - (219.9 * (timeLeft / 180))}
+                            transition="stroke-dashoffset 1s linear"
+                          />
+                        </svg>
+                        <span className="text-white font-mono text-xs font-black">{formatTime(timeLeft)}</span>
+                      </div>
+
+                      {/* Display QR code */}
+                      <div className="p-3 bg-white rounded-2xl shadow-xl w-max">
+                        {dynamicQrUrl ? (
+                          <img src={dynamicQrUrl} alt="Bakong KHQR" className="h-44 w-44 object-cover" />
+                        ) : (
+                          <div className="h-44 w-44 bg-slate-200 animate-pulse rounded-lg"></div>
+                        )}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <p className="text-white font-extrabold text-sm">{cl('waiting_payment')}</p>
+                        <p className="text-[10px] text-slate-500 font-medium">{cl('checking')}</p>
+                      </div>
+
+                    </div>
+                  )}
+
+                </div>
+              )}
+
+              {/* ABA PayWay Manual Receipt Option Interface */}
+              {paymentMethod === 'aba_qr' && (
+                <form onSubmit={handleManualCheckoutSubmit} className="max-w-md mx-auto space-y-5 text-left">
+                  
+                  <div className="p-4 bg-blue-600/10 border border-blue-500/20 rounded-2xl flex gap-3 text-left">
+                    <Landmark size={18} className="text-blue-400 shrink-0 mt-0.5" />
+                    <div className="text-xs">
+                      <p className="text-white font-bold">Transfer to ABA Account:</p>
+                      <p className="text-slate-400 mt-1">Bank Name: <span className="text-white">ABA Bank</span></p>
+                      <p className="text-slate-400">Account Name: <span className="text-white">V-TOPUP GATEWAY</span></p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-slate-400">Account Number: <span className="text-blue-400 font-mono font-bold">000 123 456</span></p>
+                        <button type="button" onClick={() => handleCopyText('000123456', 'Account ID')} className="text-blue-400 hover:text-white text-[10px] underline font-bold cursor-pointer">Copy</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{cl('ref_id_label')}</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. ABA-928451"
+                      value={transactionNo}
+                      onChange={(e) => setTransactionNo(e.target.value)}
+                      className="w-full bg-[#050816] border border-white/5 rounded-xl px-4 h-11 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{cl('upload_receipt_lbl')}</label>
+                    <div className="relative h-24 border border-dashed border-white/10 hover:border-blue-500/30 rounded-xl bg-white/3 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                      />
+                      {receiptPreview ? (
+                        <img src={receiptPreview} alt="Receipt Preview" className="h-full w-full object-contain rounded-xl p-1" />
+                      ) : (
+                        <>
+                          <Upload size={18} className="text-slate-500 animate-bounce" />
+                          <span className="text-[10px] text-slate-500 font-bold uppercase">Browse Image File</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="pt-4">
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full btn-premium h-11 text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+                    >
+                      {submitting ? (
+                        <>
+                          <RefreshCw size={14} className="animate-spin" /> Processing...
+                        </>
+                      ) : (
+                        cl('i_paid')
+                      )}
+                    </button>
+                  </div>
+
+                </form>
+              )}
+
+            </motion.div>
+          )}
+
+          {/* Payment Failed Interface Screen */}
+          {step === 'failed' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="card-glass p-8 text-center space-y-5 max-w-md mx-auto"
+            >
+              <AlertCircle size={44} className="text-red-500 mx-auto" />
+              <h2 className="text-white font-black text-lg uppercase tracking-wider">{cl('failed_title')}</h2>
+              <p className="text-slate-400 text-xs leading-relaxed">{cl('failed_desc')}</p>
+              
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setStep('review')}
+                  className="flex-1 px-4 h-10 border border-white/5 hover:bg-white/5 rounded-xl text-xs font-bold transition-all text-white uppercase tracking-wider"
+                >
+                  {cl('try_again')}
+                </button>
+                <a
+                  href="https://t.me/vtopup_bot"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 btn-premium h-10 text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                >
+                  {cl('contact_support')}
+                </a>
+              </div>
+            </motion.div>
+          )}
+
+        </div>
+
+        {/* RIGHT COLUMN: REAL-TIME BILLING SUMMARY CARD */}
+        <div className="lg:col-span-1">
+          <div className="card-glass p-6 space-y-5">
+            <h3 className="text-white font-black text-xs uppercase tracking-wider border-b border-white/5 pb-3">{cl('summary')}</h3>
+
+            <div className="space-y-3.5 text-xs text-left">
+              {cartItems.map((item) => (
+                <div key={item.id} className="flex justify-between items-start gap-2 border-b border-white/3 pb-3">
+                  <div>
+                    <h4 className="text-white font-bold">{language === 'kh' ? (item.packageItem.name_kh || item.packageItem.name_en) : item.packageItem.name_en}</h4>
+                    <p className="text-[9.5px] text-slate-500 font-mono mt-0.5">ID: {item.playerId}</p>
+                  </div>
+                  <span className="text-white font-bold shrink-0">${(parseFloat(item.packageItem.price_usd) * item.qty).toFixed(2)}</span>
+                </div>
+              ))}
+
+              <div className="space-y-2.5 pt-1.5 text-slate-400">
+                <div className="flex justify-between">
+                  <span>Order Items Subtotal:</span>
+                  <span className="text-white">${orderSubtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Processing Gateway Fee:</span>
+                  <span className="text-white">${processFee.toFixed(2)}</span>
+                </div>
+                {coupon && (
+                  <div className="flex justify-between text-emerald-400 font-bold">
+                    <span>Coupon Discount (10%):</span>
+                    <span>-${discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
+                
+                <div className="flex justify-between text-white font-bold text-sm pt-3.5 border-t border-white/5">
+                  <span>{cl('pay_amount')} (USD):</span>
+                  <span className="text-blue-400 font-extrabold text-base">${orderTotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-slate-500 font-mono text-[10px]">
+                  <span>Est. KHR:</span>
+                  <span>{totalKHR.toLocaleString()} KHR</span>
                 </div>
               </div>
             </div>
-
-            {/* Shield disclaimer */}
-            <div className="flex items-center gap-2 p-3 bg-slate-950 border border-slate-900 rounded-xl text-[10px] text-slate-500 leading-relaxed">
-              <ShieldCheck className="text-blue-500 shrink-0" size={14} />
-              <span>We check all uploads. Submitting fake receipts will lead to account suspension.</span>
+            
+            <div className="pt-2 flex items-center gap-2 justify-center text-[10px] font-bold text-slate-500">
+              <ShieldCheck className="text-emerald-500" size={13} />
+              <span>SSL Secured Payment Pipeline</span>
             </div>
-
-            {/* Submit checkout */}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full flex items-center justify-center gap-2 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold transition-all shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 active:scale-98 disabled:opacity-50"
-            >
-              {submitting ? 'Creating Order...' : t('confirm_payment')}
-            </button>
           </div>
         </div>
-      </form>
 
-      {/* KHQR Modal Popup */}
-      <Modal
-        title={null}
-        open={isQrModalOpen}
-        onCancel={() => setIsQrModalOpen(false)}
-        footer={null}
-        centered
-        width={380}
-        className="khqr-modal"
-      >
-        <div className="relative text-center">
-          <button
-            onClick={() => setIsQrModalOpen(false)}
-            className="absolute -top-3 -right-3 text-slate-400 hover:text-white transition-smooth text-md font-bold z-50 h-7 w-7 rounded-full bg-slate-900/60 border border-slate-800 flex items-center justify-center cursor-pointer hover:bg-slate-800"
-          >
-            ✕
-          </button>
-          
-          {paymentVerified ? (
-            <div className="py-8 px-4 text-center flex flex-col items-center justify-center animate-fadeIn">
-              <div className="h-16 w-16 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mb-4">
-                <CheckCircle size={36} className="animate-bounce" />
-              </div>
-              <h4 className="text-white font-bold text-lg mb-2">Payment Completed!</h4>
-              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                Your payment was successfully received and verified automatically. We are now processing your top-up order.
-              </p>
-              <button
-                onClick={() => setIsQrModalOpen(false)}
-                className="px-6 h-11 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs transition-smooth shadow-lg shadow-emerald-500/20 active:scale-95 cursor-pointer"
-              >
-                Continue
-              </button>
-            </div>
-          ) : qrExpired ? (
-            <div className="py-8 px-4 text-center flex flex-col items-center justify-center animate-fadeIn">
-              <div className="h-16 w-16 bg-red-500/10 border border-red-500/20 text-red-400 rounded-full flex items-center justify-center mb-4">
-                <AlertCircle size={36} className="animate-pulse" />
-              </div>
-              <h4 className="text-white font-bold text-lg mb-2">QR Code Expired</h4>
-              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                For security reasons, this KHQR payment session has expired after 2 minutes. Please generate a new QR to complete your checkout.
-              </p>
-              <button
-                type="button"
-                onClick={async () => {
-                  await fetchDynamicKhqr();
-                  setTimeLeft(120);
-                  setQrExpired(false);
-                }}
-                className="w-full flex items-center justify-center gap-2 h-11 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition-smooth shadow-lg shadow-blue-500/20 active:scale-95 cursor-pointer"
-              >
-                <QrCode size={14} />
-                Regenerate QR Code
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* Header Badges */}
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-[9px] font-black tracking-widest text-red-500 uppercase">
-                  KHQR
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full text-[9px] font-black tracking-widest text-blue-400 uppercase">
-                  BAKONG
-                </span>
-              </div>
-              
-              <h4 className="text-white font-black text-base mb-1 tracking-tight">Scan QR to Complete Payment</h4>
-              
-              {/* Countdown Timer Badge */}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[10px] font-bold text-amber-400 mb-4 animate-pulse">
-                <Clock size={12} className="animate-spin" />
-                <span>Expires in: {formatTime(timeLeft)}</span>
-              </div>
-              
-              {/* QR Code Graphic Container */}
-              <div className="bg-white p-6 rounded-2xl inline-block shadow-xl mb-4 relative border border-slate-800">
-                {dynamicQrLoading ? (
-                  <div className="w-48 h-48 flex flex-col items-center justify-center text-slate-800">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500 mb-2"></div>
-                    <span className="text-xs font-bold text-slate-600">Generating QR...</span>
-                  </div>
-                ) : (
-                  <img
-                    src={dynamicQrUrl || 'https://images.unsplash.com/photo-1595079676339-1534801ad6cf?w=400&auto=format&fit=crop&q=80'}
-                    alt="KHQR Code"
-                    className="w-48 h-48 mx-auto"
-                  />
-                )}
-                
-                {/* Live Polling Signal Pulse */}
-                {!dynamicQrLoading && (
-                  <div className="absolute top-3 right-3 flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                  </div>
-                )}
-              </div>
-
-              {/* Payment Details Container */}
-              <div className="bg-slate-950/80 border border-slate-900 rounded-2xl p-4 text-left space-y-3 mb-4 shadow-inner">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400 font-medium">Merchant</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-slate-100 font-bold">VUTHY REAKSA</span>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyText('VUTHY REAKSA', 'Merchant Name')}
-                      className="text-slate-500 hover:text-white transition-smooth cursor-pointer"
-                      title="Copy Name"
-                    >
-                      <Copy size={11} />
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400 font-medium">Bakong ID</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-slate-100 font-bold font-mono">vuthy_reaksa@bkrt</span>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyText('vuthy_reaksa@bkrt', 'Bakong ID')}
-                      className="text-slate-500 hover:text-white transition-smooth cursor-pointer"
-                      title="Copy Bakong ID"
-                    >
-                      <Copy size={11} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="border-t border-slate-900/60 my-2 pt-2 flex justify-between items-baseline">
-                  <span className="text-slate-400 text-xs font-medium">Total Amount</span>
-                  <div className="text-right">
-                    <span className="text-blue-400 font-black text-base">${total.toFixed(2)}</span>
-                    <span className="text-slate-500 text-[10px] font-mono block mt-0.5">
-                      ≈ {totalKhr.toLocaleString()} KHR
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Status Message */}
-              <div className="text-center">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-950/20 border border-red-500/20 rounded-full text-[10px] font-bold text-red-400 animate-pulse">
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-500"></span>
-                  Awaiting payment scan...
-                </div>
-                <p className="text-[10px] text-slate-500 mt-2.5 leading-relaxed px-4">
-                  Open any Bakong-enabled banking app to scan and complete payment. The transaction will automatically verify.
-                </p>
-              </div>
-
-              {/* Cancel Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsQrModalOpen(false);
-                  message.info('Payment scan cancelled by user.');
-                }}
-                className="w-full h-11 bg-slate-900/80 hover:bg-slate-850 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-xl text-xs transition-smooth cursor-pointer active:scale-95 flex items-center justify-center mt-4"
-              >
-                Cancel Payment
-              </button>
-            </>
-          )}
-        </div>
-      </Modal>
-    </div>
+      </div>
+    </motion.div>
   );
 };
 

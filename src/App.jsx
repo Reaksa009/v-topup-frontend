@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -9,21 +9,24 @@ import api from './services/api';
 // Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import PageSkeleton from './components/PageSkeleton';
+import ScrollToTop from './components/ScrollToTop';
 
-// Pages
-import Home from './pages/Home';
-import Games from './pages/Games';
-import GameDetail from './pages/GameDetail';
-import Promotions from './pages/Promotions';
-import News from './pages/News';
-import Contact from './pages/Contact';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import Profile from './pages/Profile';
-import Orders from './pages/Orders';
-import NotFound from './pages/NotFound';
+// Pages - Lazy Loaded
+const Home = lazy(() => import('./pages/Home'));
+const Games = lazy(() => import('./pages/Games'));
+const GameDetail = lazy(() => import('./pages/GameDetail'));
+const Promotions = lazy(() => import('./pages/Promotions'));
+const News = lazy(() => import('./pages/News'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Cart = lazy(() => import('./pages/Cart'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const Success = lazy(() => import('./pages/Success'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Orders = lazy(() => import('./pages/Orders'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 import './App.css';
 
@@ -55,6 +58,7 @@ function App() {
         <AuthProvider>
           <CartProvider>
             <Router>
+              <ScrollToTop />
               <div className="flex flex-col min-h-screen bg-slate-950 text-slate-350 transition-colors duration-300">
                 {/* Global Broadcast/Alert Notices */}
                 {alertMessage && (
@@ -72,21 +76,24 @@ function App() {
                 <Navbar />
                 
                 <main className="flex-grow">
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/games" element={<Games />} />
-                    <Route path="/games/:slug" element={<GameDetail />} />
-                    <Route path="/promotions" element={<Promotions />} />
-                    <Route path="/news" element={<News />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/checkout" element={<Checkout />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/orders" element={<Orders />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
+                  <Suspense fallback={<PageSkeleton />}>
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/games" element={<Games />} />
+                      <Route path="/games/:slug" element={<GameDetail />} />
+                      <Route path="/promotions" element={<Promotions />} />
+                      <Route path="/news" element={<News />} />
+                      <Route path="/contact" element={<Contact />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/register" element={<Register />} />
+                      <Route path="/cart" element={<Cart />} />
+                      <Route path="/checkout" element={<Checkout />} />
+                      <Route path="/success" element={<Success />} />
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/orders" element={<Orders />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Suspense>
                 </main>
 
                 <Footer />
