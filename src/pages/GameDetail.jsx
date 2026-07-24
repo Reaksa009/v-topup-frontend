@@ -222,14 +222,9 @@ const GameDetail = () => {
   };
 
   useEffect(() => {
-    const matchedGame = DUMMY_GAMES_DETAIL.find((g) => g.slug === slug);
-    if (matchedGame) {
-      setGame(matchedGame);
-      setPackages(DUMMY_PACKAGES_BY_GAME[slug] || DUMMY_PACKAGES_BY_GAME['mobile-legends']);
-      if (DUMMY_PACKAGES_BY_GAME[slug]?.length > 0) {
-        setSelectedPackage(DUMMY_PACKAGES_BY_GAME[slug][0]);
-      }
-    }
+    setGame(null);
+    setPackages([]);
+    setSelectedPackage(null);
 
     const loadGameDetails = async () => {
       try {
@@ -245,7 +240,7 @@ const GameDetail = () => {
           }
         }
       } catch (err) {
-        console.warn('Could not load game from API, using fallback details');
+        console.error('Could not load game from API:', err);
       }
     };
     loadGameDetails();

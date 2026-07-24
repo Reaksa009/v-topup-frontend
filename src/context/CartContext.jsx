@@ -5,8 +5,20 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
-    const savedCart = localStorage.getItem('cart');
-    return savedCart ? JSON.parse(savedCart) : [];
+    try {
+      const savedCart = localStorage.getItem('cart');
+      if (!savedCart) return [];
+      const parsed = JSON.parse(savedCart);
+      if (!Array.isArray(parsed)) return [];
+      // Filter out stale mock dummy items with non-MongoDB IDs
+      return parsed.filter(item => {
+        const gameId = String(item?.game?.id || item?.game?._id || '');
+        const packageId = String(item?.packageItem?.id || item?.packageItem?._id || '');
+        return gameId.length >= 12 && packageId.length >= 12;
+      });
+    } catch (e) {
+      return [];
+    }
   });
   
   const [coupon, setCoupon] = useState(() => {
