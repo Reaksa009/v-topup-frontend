@@ -307,12 +307,16 @@ const Success = () => {
 
             <div className="space-y-1">
               <p className="text-slate-500 text-[10px] uppercase font-black tracking-wider">{rt('game')}</p>
-              <span className="text-white font-bold">{firstItem.game?.name_en || 'N/A'}</span>
+              <span className="text-white font-bold">{firstItem.game_name_en || firstItem.game?.name_en || 'N/A'}</span>
             </div>
 
             <div className="space-y-1">
               <p className="text-slate-500 text-[10px] uppercase font-black tracking-wider">{rt('package')}</p>
-              <span className="text-white font-bold">{language === 'kh' ? (firstItem.package_item?.name_kh || firstItem.package_item?.name_en) : firstItem.package_item?.name_en}</span>
+              <span className="text-white font-bold">
+                {language === 'kh'
+                  ? (firstItem.package_name_kh || firstItem.package_name_en || firstItem.package_item?.name_kh || firstItem.package_item?.name_en || 'N/A')
+                  : (firstItem.package_name_en || firstItem.package_item?.name_en || 'N/A')}
+              </span>
             </div>
 
             <div className="space-y-1">
@@ -361,29 +365,6 @@ const Success = () => {
 
         </div>
 
-        {/* Form triggers */}
-        <div className="flex flex-col sm:flex-row gap-4 mt-8 select-none">
-          <button
-            onClick={() => navigate('/games')}
-            className="flex-1 btn-premium h-11 text-xs uppercase tracking-widest"
-          >
-            {rt('buy_again')}
-          </button>
-          
-          <button
-            onClick={handlePrint}
-            className="flex-1 h-11 bg-white/5 hover:bg-white/8 border border-white/5 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
-          >
-            <Printer size={13} /> {rt('print_receipt')}
-          </button>
-
-          <Link
-            to="/"
-            className="flex-grow-0 px-6 h-11 bg-[#0B1023] border border-white/5 hover:border-white/10 hover:bg-[#151e43] text-slate-350 hover:text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all flex items-center justify-center"
-          >
-            <Home size={13} />
-          </Link>
-        </div>
 
       </div>
     </motion.div>

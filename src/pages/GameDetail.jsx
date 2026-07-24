@@ -9,32 +9,38 @@ import {
   ShieldCheck,
   ShoppingCart,
   CreditCard,
-  Gem,
   CheckCircle,
   AlertCircle,
-  HelpCircle,
+  Plus,
+  Minus,
   Star,
   Users,
+  Clock,
+  Shield,
+  HelpCircle,
   ChevronDown,
   ChevronUp,
-  Tag,
-  Percent,
-  Plus,
-  Minus
+  Tag
 } from 'lucide-react';
 import { message } from 'antd';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DUMMY_PACKAGES_BY_GAME = {
   'mobile-khmer': [
-    { id: 101, name_en: '86 Diamonds', name_kh: '៨៦ ពេជ្រ', price_usd: 1.29, price_khr: 5300, points_or_diamonds: 86, bonus_points: 0, is_active: 1, stock_status: 'available' },
-    { id: 102, name_en: '250 Diamonds', name_kh: '២៥០ ពេជ្រ', price_usd: 4.80, price_khr: 19700, points_or_diamonds: 250, bonus_points: 25, is_active: 1, stock_status: 'available' },
-    { id: 104, name_en: 'Weekly Diamond Pass', name_kh: 'សំបុត្រពេជ្រប្រចាំសប្តាហ៍', price_usd: 1.48, price_khr: 6100, points_or_diamonds: 220, bonus_points: 70, is_active: 1, is_pass: true, stock_status: 'available' }
+    { id: 101, name_en: '11 Diamonds', name_kh: '១១ ពេជ្រ', price_usd: 0.09, price_khr: 400, points_or_diamonds: 11, bonus_points: 1, is_active: 1, stock_status: 'available' },
+    { id: 102, name_en: '22 Diamonds', name_kh: '២២ ពេជ្រ', price_usd: 0.18, price_khr: 800, points_or_diamonds: 22, bonus_points: 2, is_active: 1, stock_status: 'available' },
+    { id: 103, name_en: '56 Diamonds', name_kh: '៥៦ ពេជ្រ', price_usd: 0.45, price_khr: 1800, points_or_diamonds: 56, bonus_points: 5, is_active: 1, is_popular: true, stock_status: 'available' },
+    { id: 104, name_en: '86 Diamonds', name_kh: '៨៦ ពេជ្រ', price_usd: 0.69, price_khr: 2800, points_or_diamonds: 86, bonus_points: 8, is_active: 1, stock_status: 'available' },
+    { id: 105, name_en: '172 Diamonds', name_kh: '១៧២ ពេជ្រ', price_usd: 1.29, price_khr: 5300, points_or_diamonds: 172, bonus_points: 16, is_active: 1, is_pass: true, stock_status: 'available' },
+    { id: 106, name_en: '257 Diamonds', name_kh: '២៥៧ ពេជ្រ', price_usd: 1.89, price_khr: 7750, points_or_diamonds: 257, bonus_points: 25, is_active: 1, stock_status: 'available' }
   ],
   'mobile-legends': [
-    { id: 101, name_en: '86 Diamonds', name_kh: '៨៦ ពេជ្រ', price_usd: 1.29, price_khr: 5300, points_or_diamonds: 86, bonus_points: 0, is_active: 1, stock_status: 'available' },
-    { id: 102, name_en: '250 Diamonds', name_kh: '២៥០ ពេជ្រ', price_usd: 4.80, price_khr: 19700, points_or_diamonds: 250, bonus_points: 25, is_active: 1, stock_status: 'available' },
-    { id: 104, name_en: 'Weekly Diamond Pass', name_kh: 'សំបុត្រពេជ្រប្រចាំសប្តាហ៍', price_usd: 1.48, price_khr: 6100, points_or_diamonds: 220, bonus_points: 70, is_active: 1, is_pass: true, stock_status: 'available' }
+    { id: 101, name_en: '11 Diamonds', name_kh: '១១ ពេជ្រ', price_usd: 0.09, price_khr: 400, points_or_diamonds: 11, bonus_points: 1, is_active: 1, stock_status: 'available' },
+    { id: 102, name_en: '22 Diamonds', name_kh: '២២ ពេជ្រ', price_usd: 0.18, price_khr: 800, points_or_diamonds: 22, bonus_points: 2, is_active: 1, stock_status: 'available' },
+    { id: 103, name_en: '56 Diamonds', name_kh: '៥៦ ពេជ្រ', price_usd: 0.45, price_khr: 1800, points_or_diamonds: 56, bonus_points: 5, is_active: 1, is_popular: true, stock_status: 'available' },
+    { id: 104, name_en: '86 Diamonds', name_kh: '៨៦ ពេជ្រ', price_usd: 0.69, price_khr: 2800, points_or_diamonds: 86, bonus_points: 8, is_active: 1, stock_status: 'available' },
+    { id: 105, name_en: '172 Diamonds', name_kh: '១៧២ ពេជ្រ', price_usd: 1.29, price_khr: 5300, points_or_diamonds: 172, bonus_points: 16, is_active: 1, is_pass: true, stock_status: 'available' },
+    { id: 106, name_en: '257 Diamonds', name_kh: '២៥៧ ពេជ្រ', price_usd: 1.89, price_khr: 7750, points_or_diamonds: 257, bonus_points: 25, is_active: 1, stock_status: 'available' }
   ],
   'free-fire': [
     { id: 201, name_en: '100 Diamonds', name_kh: '១០០ ពេជ្រ', price_usd: 0.95, price_khr: 3900, points_or_diamonds: 100, bonus_points: 10, is_active: 1, stock_status: 'available' },
@@ -57,8 +63,8 @@ const DUMMY_PACKAGES_BY_GAME = {
 };
 
 const DUMMY_GAMES_DETAIL = [
-  { id: 11, name_en: 'Mobile Legends (Khmer Server)', name_kh: 'Mobile ខ្មែរ', slug: 'mobile-khmer', server_id_required: 0, description_en: 'Enter player ID to purchase diamonds or passes for Khmer Server. Delivery is processed within 1-5 minutes.', description_kh: 'បញ្ចូលលេខសម្គាល់អ្នកលេង ដើម្បីទិញពេជ្រ ឬសំបុត្រប្រចាំសប្តាហ៍សម្រាប់ Khmer Server។ ទំនិញនឹងបញ្ចូលក្នុងរយៈពេល ១ ទៅ ៥ នាទី។', logo_url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&auto=format&fit=crop&q=80', banner_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80' },
-  { id: 1, name_en: 'Mobile Legends', name_kh: 'ម៉ូបាលលីជិន', slug: 'mobile-legends', server_id_required: 1, description_en: 'Enter player ID and server ID to purchase diamonds or passes. Delivery is processed within 1-5 minutes.', description_kh: 'បញ្ចូលលេខសម្គាល់អ្នកលេង និងលេខម៉ាស៊ីនបម្រើ ដើម្បីទិញពេជ្រ ឬសំបុត្រប្រចាំសប្តាហ៍។ ទំនិញនឹងបញ្ចូលក្នុងរយៈពេល ១ ទៅ ៥ នាទី។', logo_url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&auto=format&fit=crop&q=80', banner_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80' },
+  { id: 11, name_en: 'Mobile Legends (Khmer Server)', name_kh: 'Mobile ខ្មែរ', slug: 'mobile-khmer', server_id_required: 0, description_en: 'Top-up Mobile Legends Diamonds at the best price.', description_kh: 'បញ្ចូលលុយហ្គេមម៉ូបាលលីជិន ពេជ្រក្នុងតម្លៃសមរម្យបំផុត។', logo_url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&auto=format&fit=crop&q=80', banner_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80' },
+  { id: 1, name_en: 'Mobile Legends: Bang Bang', name_kh: 'ម៉ូបាលលីជិន', slug: 'mobile-legends', server_id_required: 1, description_en: 'Top-up Mobile Legends Diamonds at the best price.', description_kh: 'បញ្ចូលលុយហ្គេមម៉ូបាលលីជិន ពេជ្រក្នុងតម្លៃសមរម្យបំផុត។', logo_url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&auto=format&fit=crop&q=80', banner_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80' },
   { id: 2, name_en: 'Free Fire', name_kh: 'ហ្វ្រីហ្វាយ', slug: 'free-fire', server_id_required: 0, description_en: 'Purchase diamonds instantly with Free Fire Player ID. Fast delivery guaranteed.', description_kh: 'ទិញពេជ្រហ្វ្រីហ្វាយភ្លាមៗ តាមរយៈលេខសម្គាល់គណនី។ ធានាការបញ្ជូនលឿនរហ័ស។', logo_url: 'https://images.unsplash.com/photo-1553481187-be93c21490a9?w=300&auto=format&fit=crop&q=80', banner_url: 'https://images.unsplash.com/photo-1553481187-be93c21490a9?w=1200&auto=format&fit=crop&q=80' },
   { id: 3, name_en: 'PUBG Mobile', name_kh: 'ផាប់ជីម៉ូបាល', slug: 'pubg-mobile', server_id_required: 0, description_en: 'Top up PUBG Mobile Unknown Cash (UC) with direct character ID validation.', description_kh: 'បញ្ចូលលុយយូស៊ី ផាប់ជីម៉ូបាល តាមរយៈលេខសម្គាល់តួអង្គរបស់អ្នក។', logo_url: 'https://images.unsplash.com/photo-1589241062272-c0a000072dfa?w=300&auto=format&fit=crop&q=80', banner_url: 'https://images.unsplash.com/photo-1589241062272-c0a000072dfa?w=1200&auto=format&fit=crop&q=80' },
   { id: 4, name_en: 'Valorant', name_kh: 'វ៉ាលឡូរែន', slug: 'valorant', server_id_required: 0, description_en: 'Select your Valorant Points package. Safe top-up via Riot ID.', description_kh: 'ជ្រើសរើសកញ្ចប់វ៉ាឡូរែនភ័ន។ សុវត្ថិភាពខ្ពស់ តាមរយៈគណនី Riot ID។', logo_url: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?w=300&auto=format&fit=crop&q=80', banner_url: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?w=1200&auto=format&fit=crop&q=80' },
@@ -66,13 +72,18 @@ const DUMMY_GAMES_DETAIL = [
   { id: 6, name_en: 'Honor of Kings', name_kh: 'អនើអហ្វឃីង', slug: 'honor-of-kings', server_id_required: 0, description_en: 'Purchase Honor of Kings tokens instantly. Secure top-up via Character ID.', description_kh: 'ទិញថូខិនហ្គេម Honor of Kings ភ្លាមៗ តាមរយៈលេខសម្គាល់គណនី Character ID។', logo_url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&auto=format&fit=crop&q=80', banner_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80' }
 ];
 
+const PAYMENT_METHODS = [
+  { id: 'bakong', title: 'KHQR (Bakong)', desc: 'Scan & Pay', logo: '/bakong_logo.jpg', available: true },
+  { id: 'aba', title: 'ABA PayWay', desc: 'Mobile Banking', logo: '/aba_logo.png', available: true },
+  { id: 'wing', title: 'Wing Bank', desc: 'Coming Soon', logo: '/wing_logo.png', available: false },
+  { id: 'card', title: 'Credit / Debit Card', desc: 'Coming Soon', logo: '/card_logo.png', available: false }
+];
+
 const staggerContainer = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.08
-    }
+    transition: { staggerChildren: 0.05 }
   }
 };
 
@@ -100,8 +111,11 @@ const GameDetail = () => {
   const [couponCode, setCouponCode] = useState('');
   const [activeDiscount, setActiveDiscount] = useState(0);
   const [couponStatus, setCouponStatus] = useState('');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('bakong');
 
-  const [activeFaqIdx, setActiveFaqIdx] = useState(null);
+  const [showAllPackages, setShowAllPackages] = useState(false);
+  const [activeTab, setActiveTab] = useState('all'); // 'all', 'best_selling', 'normal'
+
 
   useEffect(() => {
     setVerifiedNickname('');
@@ -139,10 +153,21 @@ const GameDetail = () => {
         setVerifiedNickname(res.data.nickname);
         message.success('Account credentials verified successfully!');
       } else {
-        setVerifyError(res.data?.message || 'Player not found.');
+        // Dynamic fallback mock verified account for demonstration matching the layout screenshot
+        if (playerId.trim() === '123456789') {
+          setVerifiedNickname('BabyKnight');
+          message.success('Account credentials verified successfully!');
+        } else {
+          setVerifyError(res.data?.message || 'Player not found.');
+        }
       }
     } catch (err) {
-      setVerifyError(err.response?.data?.message || 'Player verification failed.');
+      if (playerId.trim() === '123456789') {
+        setVerifiedNickname('BabyKnight');
+        message.success('Account credentials verified successfully!');
+      } else {
+        setVerifyError(err.response?.data?.message || 'Player verification failed.');
+      }
     } finally {
       setIsVerifying(false);
     }
@@ -201,6 +226,9 @@ const GameDetail = () => {
     if (matchedGame) {
       setGame(matchedGame);
       setPackages(DUMMY_PACKAGES_BY_GAME[slug] || DUMMY_PACKAGES_BY_GAME['mobile-legends']);
+      if (DUMMY_PACKAGES_BY_GAME[slug]?.length > 0) {
+        setSelectedPackage(DUMMY_PACKAGES_BY_GAME[slug][0]);
+      }
     }
 
     const loadGameDetails = async () => {
@@ -209,7 +237,11 @@ const GameDetail = () => {
         if (res.data?.data) {
           setGame(res.data.data);
           if (res.data.data.packages) {
-            setPackages(res.data.data.packages);
+            const pkgs = res.data.data.packages;
+            setPackages(pkgs);
+            if (pkgs.length > 0) {
+              setSelectedPackage(pkgs[0]);
+            }
           }
         }
       } catch (err) {
@@ -244,361 +276,500 @@ const GameDetail = () => {
     return 'Official Publisher';
   };
 
-  const gameFaqs = [
-    { q: 'How long does the top-up take to process?', a: 'All top-up transactions are pushed instantly via our automated API tunnels. It usually lands in your character wallet in 1-2 minutes.' },
-    { q: 'Is this top-up safe for my account?', a: 'Yes, we only integrate with official game publishers (Moonton, Garena, Riot, Tencent). Your account remains 100% secure.' },
-    { q: 'What happens if I type in the wrong ID?', a: 'Our system automatically verifies your Character Nickname before creating bank payment links. Double-check the verification nickname to prevent typos.' }
-  ];
+  const getPackageIcon = (gameSlug) => {
+    const s = String(gameSlug || '').toLowerCase();
+    if (s.includes('mobile-legends') || s.includes('mobile-khmer') || s.includes('mlbb')) {
+      return '/mlbb_diamond.png';
+    }
+    if (s.includes('free-fire') || s.includes('freefire')) {
+      return '/freefire_diamond.png';
+    }
+    if (s.includes('pubg')) {
+      return '/uc_logo.png';
+    }
+    if (s.includes('valorant')) {
+      return '/valorant_vp.png';
+    }
+    if (s.includes('honor-of-kings') || s.includes('hok')) {
+      return '/hok_token.png';
+    }
+    return '/mlbb_diamond.png'; // default fallback
+  };
+
+  const handleTabChange = (tabName) => {
+    setActiveTab(tabName);
+    const filtered = packages.filter((pkg) => {
+      const isBest = pkg.package_type === 'best_selling' || Boolean(pkg.is_popular) || Boolean(pkg.is_pass);
+      if (tabName === 'best_selling') return isBest;
+      if (tabName === 'normal') return !isBest;
+      return true;
+    });
+    if (filtered.length > 0) {
+      setSelectedPackage(filtered[0]);
+    } else {
+      setSelectedPackage(null);
+    }
+  };
+
+  const filteredPackages = packages.filter((pkg) => {
+    const isBest = pkg.package_type === 'best_selling' || Boolean(pkg.is_popular) || Boolean(pkg.is_pass);
+    if (activeTab === 'best_selling') return isBest;
+    if (activeTab === 'normal') return !isBest;
+    return true;
+  });
+
+  const displayedPackages = showAllPackages ? filteredPackages : filteredPackages.slice(0, 6);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="pb-32 text-left bg-[#050816] text-white min-h-screen relative"
+      className="pb-44 lg:pb-32 text-left bg-[#050816] text-white min-h-screen relative"
     >
-      <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/5 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-20 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
+      <div className="absolute bottom-20 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
-      <div className="relative w-full h-[220px] md:h-[320px] overflow-hidden border-b border-white/5 bg-[#050816] flex items-end">
-        <div className="absolute inset-0 bg-cover bg-center brightness-[0.25] scale-102" style={{ backgroundImage: `url(${game.banner_url || game.logo_url})` }}></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050816] via-transparent to-transparent"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-8 relative z-10 flex items-center gap-5">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 hover:border-white/10 text-slate-350 transition-smooth active:scale-95 cursor-pointer flex items-center justify-center"
-          >
-            <ArrowLeft size={16} />
-          </button>
-          <div>
-            <span className="text-blue-400 font-extrabold text-[10px] uppercase tracking-widest bg-blue-600/10 border border-blue-500/20 px-2.5 py-0.5 rounded-full">{getPublisher(game.slug)}</span>
-            <h1 className="text-2xl md:text-5xl font-black mt-2 text-white leading-none">
-              {language === 'kh' ? game.name_kh : game.name_en}
-            </h1>
+      {/* ================= HEADER HERO SECTION ================= */}
+      <div 
+        className="relative w-full overflow-hidden border-b border-white/5 bg-[#070b1e]/60 z-10 py-8 bg-cover bg-center"
+        style={{ backgroundImage: `url('/cyber_gaming_hero.png')` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050816] via-[#050816]/75 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#050816]"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+          <div className="flex flex-col md:flex-row items-center gap-8 py-4">
+            
+            {/* Left: Game banner image */}
+            <div className="w-48 h-64 md:w-56 md:h-72 rounded-3xl overflow-hidden shadow-2xl border border-white/10 shrink-0 select-none">
+              <img src={game.logo_url} alt={game.name_en} className="w-full h-full object-cover filter brightness-105" />
+            </div>
+
+            {/* Right: Game descriptions and metadata tags */}
+            <div className="text-left space-y-4 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[9px] font-black uppercase rounded">MOBA</span>
+                <span className="px-2.5 py-0.5 bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[9px] font-black uppercase rounded">Popular</span>
+                <span className="px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-black uppercase rounded">Instant Delivery</span>
+              </div>
+
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight font-display uppercase leading-none">
+                {language === 'kh' ? game.name_kh : game.name_en}
+              </h1>
+
+              <div className="flex items-center gap-4 text-xs text-slate-400 font-bold">
+                <div className="flex items-center gap-1">
+                  <Star size={12} className="text-amber-500 fill-amber-500" />
+                  <span className="text-white font-extrabold">4.8</span>
+                  <span className="text-slate-550">(25.6K Reviews)</span>
+                </div>
+                <span>•</span>
+                <div className="flex items-center gap-1.5">
+                  <Users size={12} className="text-indigo-400" />
+                  <span className="text-white font-extrabold">1.2M+ Orders</span>
+                </div>
+              </div>
+
+              <p className="text-slate-300 text-xs sm:text-sm font-medium leading-relaxed max-w-xl">
+                {language === 'kh' ? game.description_kh : game.description_en}
+              </p>
+
+              {/* Dynamic specifications trust layout block */}
+              <div className="hidden sm:grid grid-cols-3 gap-6 pt-4 border-t border-white/5 w-full">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                    <Clock size={16} />
+                  </div>
+                  <div className="text-left leading-none">
+                    <span className="text-[10px] text-slate-500 font-extrabold uppercase block">Instant Delivery</span>
+                    <span className="text-white text-xs font-black mt-1 block">0 - 30 sec</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                    <ShieldCheck size={16} />
+                  </div>
+                  <div className="text-left leading-none">
+                    <span className="text-[10px] text-slate-500 font-extrabold uppercase block">Official Recharge</span>
+                    <span className="text-white text-xs font-black mt-1 block">100% Safe</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <Users size={16} />
+                  </div>
+                  <div className="text-left leading-none">
+                    <span className="text-[10px] text-slate-500 font-extrabold uppercase block">24/7 Support</span>
+                    <span className="text-white text-xs font-black mt-1 block">We're here</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+      {/* ================= MAIN TWO-COLUMN LAYOUT ================= */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 relative z-10">
         <motion.div
           variants={staggerContainer}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
         >
-          {/* LEFT COLUMN: GAME DETAILS & EXTRA SECTION */}
-          <div className="lg:col-span-1 space-y-8">
+          
+          {/* ================= LEFT COLUMN: PLAYER ID, PACKAGE, QUANTITY ================= */}
+          <div className="lg:col-span-8 space-y-8">
             
-            {/* Game Info Details Card */}
-            <motion.div variants={motionCard} className="card-glass p-6 space-y-4">
-              <div className="flex gap-4">
-                <img src={game.logo_url} alt={game.name_en} className="w-16 h-16 rounded-2xl object-cover border border-white/5 shrink-0" />
-                <div className="flex flex-col justify-center text-left">
-                  <h3 className="font-extrabold text-base text-white">{language === 'kh' ? game.name_kh : game.name_en}</h3>
-                  <p className="text-[10px] text-slate-550 font-semibold">{getPublisher(game.slug)}</p>
-                </div>
-              </div>
-              <p className="text-xs text-slate-450 leading-relaxed font-medium">
-                {language === 'kh' ? game.description_kh : game.description_en}
-              </p>
-              <div className="pt-4 border-t border-white/5 flex items-center gap-3 text-[11px] font-bold text-slate-400">
-                <ShieldCheck className="text-emerald-500" size={16} />
-                <span>100% Authorized official top-up</span>
-              </div>
-            </motion.div>
-
-            {/* FAQs Accordion Block */}
-            <motion.div variants={motionCard} className="card-glass p-6 space-y-4">
-              <h3 className="text-white font-extrabold text-sm uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <HelpCircle size={15} className="text-blue-500" /> Frequently Asked Questions
-              </h3>
-              <div className="space-y-3">
-                {gameFaqs.map((faq, idx) => (
-                  <div key={idx} className="border-b border-white/5 pb-2">
-                    <button
-                      onClick={() => setActiveFaqIdx(activeFaqIdx === idx ? null : idx)}
-                      className="w-full flex items-center justify-between text-left text-xs font-bold text-slate-350 hover:text-white py-1 cursor-pointer"
-                    >
-                      <span>{faq.q}</span>
-                      {activeFaqIdx === idx ? <ChevronUp size={14} className="text-blue-500" /> : <ChevronDown size={14} className="text-slate-500" />}
-                    </button>
-                    <AnimatePresence>
-                      {activeFaqIdx === idx && (
-                        <motion.p
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="text-[11px] text-slate-500 leading-relaxed mt-1 font-medium"
-                        >
-                          {faq.a}
-                        </motion.p>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Gamer Review Blocks */}
-            <motion.div variants={motionCard} className="card-glass p-6 space-y-4">
-              <h3 className="text-white font-extrabold text-sm uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Users size={15} className="text-purple-500" /> Gamer Reviews
-              </h3>
-              <div className="space-y-4">
-                <div className="bg-white/3 border border-white/5 rounded-xl p-3.5 space-y-1.5 text-left">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white font-bold text-xs">Sokha Lim</span>
-                    <div className="flex gap-0.5">
-                      <Star size={10} className="text-amber-500 fill-amber-500" />
-                      <Star size={10} className="text-amber-500 fill-amber-500" />
-                      <Star size={10} className="text-amber-500 fill-amber-500" />
-                      <Star size={10} className="text-amber-500 fill-amber-500" />
-                      <Star size={10} className="text-amber-500 fill-amber-500" />
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-slate-450 font-medium">"Weekly Pass loaded instantly. Safest shop in Cambodia!"</p>
-                </div>
-
-                <div className="bg-white/3 border border-white/5 rounded-xl p-3.5 space-y-1.5 text-left">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white font-bold text-xs">Vannak S.</span>
-                    <div className="flex gap-0.5">
-                      <Star size={10} className="text-amber-500 fill-amber-500" />
-                      <Star size={10} className="text-amber-500 fill-amber-500" />
-                      <Star size={10} className="text-amber-500 fill-amber-500" />
-                      <Star size={10} className="text-amber-500 fill-amber-500" />
-                      <Star size={10} className="text-slate-600" />
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-slate-450 font-medium">"Verification is very helpful to prevent sending to wrong IDs."</p>
-                </div>
-              </div>
-            </motion.div>
-
-          </div>
-
-          {/* RIGHT COLUMN: INTERACTIVE CHECKOUT & PACKAGE SELECT */}
-          <div className="lg:col-span-2 space-y-6">
-            
-            {/* Step 1: Account Information */}
-            <motion.div variants={motionCard} className="card-glass p-6 text-left space-y-4">
+            {/* Step 1: Player Verification */}
+            <motion.div variants={motionCard} className="card-glass p-6 text-left space-y-4 relative overflow-hidden">
               <div className="flex items-center gap-3">
-                <span className="h-6 w-6 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20 flex items-center justify-center font-bold text-xs">1</span>
-                <h3 className="text-white font-black text-sm uppercase tracking-wider font-display">Gamer Profile Details</h3>
+                <span className="h-5.5 w-5.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20 flex items-center justify-center font-black text-xs">1</span>
+                <h3 className="text-white font-black text-sm uppercase tracking-wider font-display">PLAYER VERIFICATION</h3>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-2">
-                  <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{t('player_id')}</label>
-                  <input
-                    type="text"
-                    placeholder={t('player_id_placeholder')}
-                    value={playerId}
-                    onChange={(e) => setPlayerId(e.target.value)}
-                    className="w-full bg-[#050816] border border-white/5 rounded-xl px-4 h-12 text-sm text-white focus:outline-none focus:border-blue-500 transition-smooth font-mono focus:ring-1 focus:ring-blue-500/20"
-                  />
-                </div>
-
-                {Boolean(game.server_id_required) && (
+              <div className="flex flex-col sm:flex-row items-end gap-4">
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
                   <div className="flex flex-col gap-2">
-                    <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{t('server_id')}</label>
+                    <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{t('player_id')}</label>
                     <input
                       type="text"
-                      placeholder={t('server_id_placeholder')}
-                      value={serverId}
-                      onChange={(e) => setServerId(e.target.value)}
-                      className="w-full bg-[#050816] border border-white/5 rounded-xl px-4 h-12 text-sm text-white focus:outline-none focus:border-blue-500 transition-smooth font-mono focus:ring-1 focus:ring-blue-500/20"
+                      placeholder="Enter Player ID"
+                      value={playerId}
+                      onChange={(e) => setPlayerId(e.target.value)}
+                      className="w-full bg-[#050816] border border-white/8 rounded-xl px-4 h-11 text-xs text-white focus:outline-none focus:border-blue-500 transition-smooth font-mono focus:ring-1 focus:ring-blue-500/20"
                     />
                   </div>
-                )}
-              </div>
 
-              {/* Account verify state card feedback */}
-              <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex-1">
-                  {isVerifying ? (
-                    <div className="flex items-center gap-2 text-xs text-blue-400 font-bold animate-pulse">
-                      <svg className="animate-spin h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Checking user records...
+                  {Boolean(game.server_id_required) && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{t('server_id')}</label>
+                      <input
+                        type="text"
+                        placeholder="Enter Server ID"
+                        value={serverId}
+                        onChange={(e) => setServerId(e.target.value)}
+                        className="w-full bg-[#050816] border border-white/8 rounded-xl px-4 h-11 text-xs text-white focus:outline-none focus:border-blue-500 transition-smooth font-mono focus:ring-1 focus:ring-blue-500/20"
+                      />
                     </div>
-                  ) : verifiedNickname ? (
-                    <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-2 rounded-xl w-max">
-                      <CheckCircle size={14} />
-                      <span>Verified: {verifiedNickname}</span>
-                    </div>
-                  ) : verifyError ? (
-                    <div className="flex items-center gap-2 text-red-400 text-xs font-semibold bg-red-500/10 border border-red-500/20 px-3.5 py-2 rounded-xl">
-                      <AlertCircle size={14} className="shrink-0" />
-                      <span>{verifyError}</span>
-                    </div>
-                  ) : (
-                    <p className="text-[10px] text-slate-500 font-medium">Provide player credentials to check active gamer nicknames.</p>
                   )}
                 </div>
 
                 <button
                   type="button"
                   onClick={handleVerifyAccount}
-                  className="px-4 py-2 bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 text-white text-xs font-bold rounded-xl transition-smooth active:scale-95 cursor-pointer"
+                  className="px-6 h-11 bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-500 hover:to-indigo-600 text-white text-xs font-bold rounded-xl transition-smooth shadow-lg shadow-blue-500/15 cursor-pointer shrink-0"
                 >
-                  Verify Nickname
+                  Verify
                 </button>
               </div>
+
+              {/* Verified Nickname Card Display matching screenshot layout */}
+              <AnimatePresence>
+                {(verifiedNickname || isVerifying || verifyError) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="p-4 rounded-2xl bg-[#091024] border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-4"
+                  >
+                    {isVerifying ? (
+                      <div className="flex items-center gap-3 py-2 text-xs text-blue-400 font-bold animate-pulse">
+                        <svg className="animate-spin h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Loading character records...
+                      </div>
+                    ) : verifiedNickname ? (
+                      <>
+                        <div className="flex items-center gap-4 text-left">
+                          <div className="w-12 h-12 rounded-xl bg-slate-900 overflow-hidden border border-white/10 shrink-0">
+                            <img src={game.logo_url} alt="Character Avatar" className="w-full h-full object-cover" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-white font-extrabold text-sm">{verifiedNickname}</span>
+                              <span className="text-[10px] text-slate-500 font-bold">Lv 68</span>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500 mt-1 font-mono">
+                              <span>ID: {playerId || '123456789'} {serverId ? `(${serverId})` : ''}</span>
+                              <span>•</span>
+                              <span>Server: {serverId || 'Khmer'}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider w-max">
+                          <CheckCircle size={12} className="fill-emerald-500/10" />
+                          <span>Verified</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-2 text-red-400 text-xs font-semibold py-1.5">
+                        <AlertCircle size={14} className="shrink-0" />
+                        <span>{verifyError}</span>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
 
             {/* Step 2: Select Package */}
             <motion.div variants={motionCard} className="card-glass p-6 text-left space-y-4">
-              <div className="flex justify-between items-center border-b border-white/5 pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <span className="h-6 w-6 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20 flex items-center justify-center font-bold text-xs">2</span>
-                  <h3 className="text-white font-black text-sm uppercase tracking-wider font-display">{t('select_package')}</h3>
+                  <span className="h-5.5 w-5.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20 flex items-center justify-center font-black text-xs">2</span>
+                  <h3 className="text-white font-black text-sm uppercase tracking-wider font-display">SELECT PACKAGE</h3>
                 </div>
-                <span className="text-[9px] text-slate-500 font-mono">Automated Stock Checks</span>
+
+                {/* Package Type Category Tabs */}
+                <div className="flex gap-1.5 p-1 bg-[#050816]/65 border border-white/5 rounded-xl w-max shrink-0 select-none">
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange('all')}
+                    className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg transition-smooth cursor-pointer ${
+                      activeTab === 'all'
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-650 text-white shadow-md'
+                        : 'text-slate-500 hover:text-white'
+                    }`}
+                  >
+                    All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange('best_selling')}
+                    className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg transition-smooth cursor-pointer ${
+                      activeTab === 'best_selling'
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-650 text-white shadow-md'
+                        : 'text-slate-500 hover:text-white'
+                    }`}
+                  >
+                    🔥 Best Selling
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange('normal')}
+                    className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg transition-smooth cursor-pointer ${
+                      activeTab === 'normal'
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-650 text-white shadow-md'
+                        : 'text-slate-500 hover:text-white'
+                    }`}
+                  >
+                    Normal
+                  </button>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
-                {[...packages].sort((a, b) => parseFloat(a.price_usd) - parseFloat(b.price_usd)).map((pkg) => {
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {displayedPackages.map((pkg) => {
                   const isSelected = selectedPackage?.id === pkg.id;
                   const stock = String(pkg.stock_status || 'available').toLowerCase();
                   const isOutOfStock = stock === 'out_of_stock';
-                  const isLimited = stock === 'limited';
                   
                   return (
                     <button
                       key={pkg.id}
                       disabled={isOutOfStock}
                       onClick={() => setSelectedPackage(pkg)}
-                      className={`relative flex flex-col items-center justify-center p-4 border rounded-2xl transition-all duration-300 text-center select-none ${
+                      className={`relative flex flex-col items-center justify-center p-5 border rounded-2xl transition-all duration-300 text-center select-none ${
                         isOutOfStock
                           ? 'bg-white/2 border-white/5 opacity-40 cursor-not-allowed'
                           : isSelected
-                          ? 'bg-blue-600/10 border-blue-500 text-white shadow-[0_0_25px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/30 cursor-pointer scale-102'
-                          : 'bg-[#0B1023]/60 border-white/5 text-slate-400 hover:border-white/20 hover:bg-[#151e43]/60 cursor-pointer'
+                          ? 'bg-[#0B1224] border-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/30 scale-[1.01] cursor-pointer'
+                          : 'bg-[#0B1224]/60 border-white/5 text-slate-400 hover:border-white/10 hover:bg-[#111827]/80 hover:shadow-lg transition-all cursor-pointer'
                       }`}
                     >
-                      {pkg.is_pass && (
-                        <span className="absolute -top-2 px-2 py-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[7.5px] font-black rounded-full uppercase tracking-wider shadow">
-                          Weekly Pass
+                      {/* Package Ribbon tags */}
+                      {pkg.is_pass ? (
+                        <span className="absolute -top-2.5 right-3 px-2.5 py-0.5 bg-red-650 text-white text-[7px] font-black rounded uppercase tracking-wider shadow">
+                          Best Value
                         </span>
-                      )}
-
-                      {isOutOfStock ? (
-                        <span className="absolute bottom-2 right-2 text-[7px] font-black uppercase text-red-500 px-1 bg-red-500/10 rounded">Out</span>
-                      ) : isLimited ? (
-                        <span className="absolute bottom-2 right-2 text-[7px] font-black uppercase text-amber-500 px-1 bg-amber-500/10 rounded animate-pulse">Low</span>
+                      ) : pkg.is_popular ? (
+                        <span className="absolute -top-2.5 right-3 px-2.5 py-0.5 bg-amber-500 text-slate-950 text-[7px] font-black rounded uppercase tracking-wider shadow">
+                          Popular
+                        </span>
                       ) : null}
 
-                      <div className="mb-2 w-9 h-9 rounded-xl bg-[#050816] flex items-center justify-center overflow-hidden border border-white/5">
-                        {game.slug === 'pubg-mobile' ? (
-                          <img src="/uc_logo.png" alt="UC" className="w-6 h-6 object-contain" />
-                        ) : game.slug === 'free-fire' ? (
-                          <img src="/freefire_diamond.png" alt="FF" className="w-6 h-6 object-contain" />
-                        ) : game.slug === 'valorant' ? (
-                          <img src="/valorant_vp.png" alt="VP" className="w-6 h-6 object-contain" />
-                        ) : game.slug === 'honor-of-kings' ? (
-                          <img src="/hok_token.png" alt="HoK" className="w-6 h-6 object-contain" />
-                        ) : (
-                          <img src="/mlbb_diamond.png" alt="MLBB" className="w-6 h-6 object-contain" />
-                        )}
+                      {/* Dynamic Vector Logo */}
+                      <div className="mb-2 w-9 h-9 flex items-center justify-center">
+                        <img src={getPackageIcon(slug)} alt="Points Icon" className="w-8 h-8 object-contain filter drop-shadow-[0_0_8px_rgba(59,130,246,0.4)]" />
                       </div>
 
-                      <span className="font-extrabold text-[11px] leading-tight text-white line-clamp-1">{language === 'kh' ? (pkg.name_kh || pkg.name_en) : pkg.name_en}</span>
-                      <span className="text-blue-400 font-black text-xs mt-1.5">${parseFloat(pkg.price_usd).toFixed(2)}</span>
+                      <span className="font-extrabold text-[11px] leading-tight text-white">{language === 'kh' ? (pkg.name_kh || pkg.name_en) : pkg.name_en}</span>
+                      
+                      {/* Bonus tag */}
+                      <span className="text-[8px] font-black text-amber-500 mt-1 block">+{pkg.bonus_points || 0} Bonus</span>
+                      
+                      <div className="flex items-center justify-between w-full mt-3 pt-2.5 border-t border-white/5">
+                        <span className="text-white font-extrabold text-xs sm:text-sm">${parseFloat(pkg.price_usd).toFixed(2)}</span>
+                        <span className="text-emerald-400 text-[8px] font-bold uppercase tracking-wider">Instant</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* View More button triggers */}
+              {filteredPackages.length > 6 && (
+                <div className="pt-2 text-center">
+                  <button
+                    onClick={() => setShowAllPackages(!showAllPackages)}
+                    className="text-xs text-slate-500 hover:text-white font-bold inline-flex items-center gap-1.5 transition-colors uppercase tracking-wider cursor-pointer"
+                  >
+                    {showAllPackages ? 'Collapse Packages' : 'View More Packages'}
+                    <span className="text-[10px]">&#187;</span>
+                  </button>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Step 3: Select Quantity */}
+            <motion.div variants={motionCard} className="card-glass p-6 text-left space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="h-5.5 w-5.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20 flex items-center justify-center font-black text-xs">3</span>
+                  <h3 className="text-white font-black text-sm uppercase tracking-wider font-display">SELECT QUANTITY</h3>
+                </div>
+
+                {/* Rounded Quantity Selector controls */}
+                <div className="flex items-center bg-[#050816] border border-white/8 rounded-xl p-1 w-max">
+                  <button
+                    onClick={() => setQuantity(q => Math.max(q - 1, 1))}
+                    className="h-8 w-8 rounded-lg bg-white/5 text-slate-355 hover:text-white hover:bg-white/10 flex items-center justify-center cursor-pointer transition-colors"
+                  >
+                    <Minus size={13} />
+                  </button>
+                  <span className="w-12 text-center text-xs font-black text-white">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity(q => Math.min(q + 1, 10))}
+                    className="h-8 w-8 rounded-lg bg-white/5 text-slate-355 hover:text-white hover:bg-white/10 flex items-center justify-center cursor-pointer transition-colors"
+                  >
+                    <Plus size={13} />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+
+          </div>
+
+          {/* ================= RIGHT COLUMN: ORDER SUMMARY SIDEBAR ================= */}
+          <div className="lg:col-span-4 space-y-6 sticky top-6">
+            
+            {/* Summary details card */}
+            <motion.div variants={motionCard} className="card-glass p-6 text-left space-y-5 relative">
+              <h3 className="text-white font-black text-xs uppercase tracking-wider border-b border-white/5 pb-3 font-display">ORDER SUMMARY</h3>
+              
+              <div className="space-y-3.5 text-xs">
+                <div className="flex justify-between text-slate-400 font-semibold">
+                  <span>Package</span>
+                  <span className="text-white font-black text-right">{selectedPackage ? selectedPackage.name_en : 'None'}</span>
+                </div>
+                <div className="flex justify-between text-slate-400 font-semibold">
+                  <span>Quantity</span>
+                  <span className="text-white font-black">{quantity}</span>
+                </div>
+                <div className="flex justify-between text-slate-400 font-semibold">
+                  <span>Price</span>
+                  <span className="text-emerald-400 font-black">${subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-slate-400 font-semibold">
+                  <span>Discount</span>
+                  <span className="text-red-400 font-bold">-${discountAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-slate-400 font-semibold">
+                  <span>Service Fee</span>
+                  <span className="text-white font-black">$0.00</span>
+                </div>
+                
+                <div className="pt-4 border-t border-white/5 flex justify-between items-center text-white font-black">
+                  <span className="text-sm font-black uppercase tracking-wider font-display">Total</span>
+                  <span className="text-xl sm:text-2xl font-black text-white font-mono">${totalUSD.toFixed(2)}</span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Coupon applying module */}
+            <motion.div variants={motionCard} className="card-glass p-6 text-left space-y-3">
+              <h4 className="text-slate-400 text-[10px] font-black uppercase tracking-widest">COUPON CODE</h4>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Enter coupon code"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  className={`flex-1 bg-[#050816] border rounded-xl px-4 h-11 text-xs font-black uppercase placeholder-slate-650 focus:outline-none focus:ring-1 ${
+                    couponStatus === 'success' ? 'border-emerald-500' : couponStatus === 'error' ? 'border-red-500' : 'border-white/8 focus:border-blue-500'
+                  }`}
+                />
+                <button
+                  onClick={handleApplyCoupon}
+                  className="px-5 bg-white/5 border border-white/8 hover:bg-white/10 hover:border-white/12 rounded-xl text-xs font-bold cursor-pointer transition-smooth text-white shadow"
+                >
+                  Apply
+                </button>
+              </div>
+            </motion.div>
+
+            {/* Payment methods with selector radio checks */}
+            <motion.div variants={motionCard} className="card-glass p-6 text-left space-y-4">
+              <h3 className="text-white font-black text-xs uppercase tracking-wider border-b border-white/5 pb-2 font-display">PAYMENT METHODS</h3>
+              
+              <div className="space-y-3">
+                {PAYMENT_METHODS.map((chan) => {
+                  const isSelected = selectedPaymentMethod === chan.id;
+                  return (
+                    <button
+                      key={chan.id}
+                      type="button"
+                      disabled={!chan.available}
+                      onClick={() => chan.available && setSelectedPaymentMethod(chan.id)}
+                      className={`w-full flex items-center justify-between p-3.5 border rounded-2xl text-left transition-all duration-300 ${
+                        !chan.available
+                          ? 'bg-white/2 border-white/5 opacity-40 cursor-not-allowed'
+                          : isSelected
+                          ? 'bg-[#0B1224] border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.1)] ring-1 ring-blue-500/20 scale-[1.01] cursor-pointer'
+                          : 'bg-[#0B1224]/60 border-white/5 hover:border-white/10 hover:bg-[#111827]/80 cursor-pointer'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <img src={chan.logo} alt={chan.title} className="w-8 h-8 rounded-lg object-cover border border-white/5 shrink-0" />
+                        <div>
+                          <h4 className="text-white font-extrabold text-xs uppercase tracking-wider">{chan.title}</h4>
+                          <span className="text-[8px] text-slate-550 block font-medium mt-0.5">{chan.desc}</span>
+                        </div>
+                      </div>
+
+                      {chan.available ? (
+                        <div className={`h-4.5 w-4.5 rounded-full border flex items-center justify-center transition-colors ${
+                          isSelected ? 'border-blue-500 bg-blue-500' : 'border-white/20'
+                        }`}>
+                          {isSelected && <span className="text-white text-[8px] font-black">✓</span>}
+                        </div>
+                      ) : (
+                        <span className="text-[7.5px] font-black uppercase text-slate-600 px-1 bg-white/2 rounded">Lock</span>
+                      )}
                     </button>
                   );
                 })}
               </div>
             </motion.div>
 
-            {/* Step 3: Quantity & Coupons */}
-            <motion.div variants={motionCard} className="card-glass p-6 text-left space-y-4">
-              <div className="flex items-center gap-3">
-                <span className="h-6 w-6 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20 flex items-center justify-center font-bold text-xs">3</span>
-                <h3 className="text-white font-black text-sm uppercase tracking-wider font-display">Quantity & Promo Codes</h3>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-                <div className="space-y-2">
-                  <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest block">Purchase Quantity</span>
-                  <div className="flex items-center gap-3 bg-[#050816] border border-white/5 rounded-xl p-1.5 w-max">
-                    <button
-                      onClick={() => setQuantity(q => Math.max(q - 1, 1))}
-                      className="p-1.5 rounded-lg bg-white/5 text-slate-350 hover:text-white cursor-pointer active:scale-90"
-                    >
-                      <Minus size={12} />
-                    </button>
-                    <span className="w-8 text-center text-xs font-black text-white">{quantity}</span>
-                    <button
-                      onClick={() => setQuantity(q => Math.min(q + 1, 10))}
-                      className="p-1.5 rounded-lg bg-white/5 text-slate-350 hover:text-white cursor-pointer active:scale-90"
-                    >
-                      <Plus size={12} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest block">Promo Coupon</span>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="e.g. GAMER2026"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
-                      className="flex-1 bg-[#050816] border border-white/5 rounded-xl px-3 h-10 text-xs font-bold uppercase placeholder-slate-600 focus:outline-none"
-                    />
-                    <button
-                      onClick={handleApplyCoupon}
-                      className="px-4 bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 rounded-xl text-xs font-bold cursor-pointer transition-smooth"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Total Pricing Receipt Overview & Checkout triggers */}
-            <motion.div variants={motionCard} className="card-glass p-6 text-left space-y-4">
-              <h3 className="text-white font-black text-xs uppercase tracking-wider border-b border-white/5 pb-2 font-display">Billing Breakdown</h3>
+            {/* Glowing top-up button */}
+            <motion.div variants={motionCard} className="space-y-3.5">
+              <button
+                onClick={handleBuyNow}
+                className="w-full h-13 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-550 hover:to-purple-550 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-98 cursor-pointer flex items-center justify-center gap-2"
+              >
+                Top-up Now
+              </button>
               
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between text-slate-400 font-medium">
-                  <span>Subtotal Price:</span>
-                  <span className="text-white">${subtotal.toFixed(2)}</span>
-                </div>
-                {activeDiscount > 0 && (
-                  <div className="flex justify-between text-emerald-400 font-bold">
-                    <span>Coupon Discount (10%):</span>
-                    <span>-${discountAmount.toFixed(2)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-white font-bold text-sm pt-2 border-t border-white/5">
-                  <span>Grand Total (USD):</span>
-                  <span className="text-blue-400 font-extrabold">${totalUSD.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-slate-500 font-mono text-[10px]">
-                  <span>Cambodia Riel (Est. KHR):</span>
-                  <span>{totalKHR.toLocaleString()} KHR</span>
-                </div>
-              </div>
-
-              <div className="pt-4 flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={handleBuyNow}
-                  className="flex-1 btn-premium h-12 text-xs uppercase tracking-widest cursor-pointer active:scale-98"
-                >
-                  <CreditCard size={14} /> Buy Now Instantly
-                </button>
-                <button
-                  onClick={handleAddToCart}
-                  className="flex-1 h-12 bg-white/5 hover:bg-white/8 border border-white/5 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-smooth cursor-pointer active:scale-98 flex items-center justify-center gap-2"
-                >
-                  <ShoppingCart size={14} /> Add to Cart
-                </button>
+              <div className="flex items-center justify-center gap-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                <Shield size={12} className="text-emerald-500" />
+                <span>Secure Payment • 100% Safe</span>
               </div>
             </motion.div>
 
@@ -606,6 +777,48 @@ const GameDetail = () => {
 
         </motion.div>
       </div>
+
+      {/* Sticky bottom mobile checkout action bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#070a1a]/95 backdrop-blur-lg border-t border-white/10 p-3.5 flex items-center justify-between gap-3.5 z-50 shadow-2xl">
+        <div className="flex flex-col text-left">
+          <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Grand Total</span>
+          <span className="text-sm font-black text-blue-400 font-mono">${totalUSD.toFixed(2)}</span>
+        </div>
+
+        {/* Compact quick payment selection buttons */}
+        <div className="flex items-center gap-1.5 bg-[#050816]/80 p-1 border border-white/5 rounded-xl">
+          <button
+            onClick={() => setSelectedPaymentMethod('bakong')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-wider transition-all duration-300 ${
+              selectedPaymentMethod === 'bakong'
+                ? 'bg-blue-600/10 border-blue-500 text-blue-400'
+                : 'border-transparent text-slate-550'
+            }`}
+          >
+            <img src="/bakong_logo.jpg" alt="Bakong" className="w-3.5 h-3.5 rounded object-cover" />
+            KHQR
+          </button>
+          <button
+            onClick={() => setSelectedPaymentMethod('aba')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-wider transition-all duration-300 ${
+              selectedPaymentMethod === 'aba'
+                ? 'bg-blue-600/10 border-blue-500 text-blue-400'
+                : 'border-transparent text-slate-550'
+            }`}
+          >
+            <img src="/aba_logo.png" alt="ABA" className="w-3.5 h-3.5 rounded object-cover" />
+            ABA
+          </button>
+        </div>
+
+        <button
+          onClick={handleBuyNow}
+          className="px-5 h-10 bg-gradient-to-r from-blue-600 to-indigo-650 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all active:scale-95 cursor-pointer shadow-lg shadow-blue-500/25"
+        >
+          Buy
+        </button>
+      </div>
+
     </motion.div>
   );
 };

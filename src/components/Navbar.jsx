@@ -150,61 +150,10 @@ const Navbar = () => {
 
           {/* Desktop Navigation Links */}
           <div className="hidden lg:flex items-center gap-7">
-            {/* Mega Menu Toggle Trigger */}
-            <div className="relative" ref={megaMenuRef}>
-              <button
-                onClick={() => setShowMegaMenu(!showMegaMenu)}
-                className={`flex items-center gap-1.5 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-300 cursor-pointer ${
-                  showMegaMenu ? 'text-blue-400' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <Grid size={14} />
-                Explore Games
-                <ChevronDown size={12} className={`transition-transform duration-300 ${showMegaMenu ? 'rotate-180' : ''}`} />
-              </button>
-
-              {/* Mega Menu Dropdown */}
-              <AnimatePresence>
-                {showMegaMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 15 }}
-                    transition={{ type: 'spring', damping: 25, stiffness: 180 }}
-                    className="absolute top-12 left-[-100px] w-[580px] bg-[#0b1023]/95 backdrop-blur-2xl border border-white/8 rounded-2xl p-5 shadow-2xl z-50 grid grid-cols-3 gap-4"
-                  >
-                    <div className="col-span-3 border-b border-white/5 pb-2 mb-1 flex justify-between items-center">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-                        <Sparkles size={11} /> Top Popular Games
-                      </span>
-                      <Link to="/games" onClick={() => setShowMegaMenu(false)} className="text-[10px] text-slate-400 hover:text-white flex items-center gap-0.5">
-                        View All <ArrowRight size={10} />
-                      </Link>
-                    </div>
-                    {POPULAR_GAMES.map((g) => (
-                      <Link
-                        key={g.slug}
-                        to={`/games/${g.slug}`}
-                        onClick={() => setShowMegaMenu(false)}
-                        className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/5 transition-all duration-200"
-                      >
-                        <img src={g.image} alt={g.name} className="w-10 h-10 rounded-lg object-cover" />
-                        <div className="text-left">
-                          <h4 className="text-white font-bold text-xs line-clamp-1">{g.name}</h4>
-                          <span className="text-[9px] text-slate-500 font-medium">{g.category}</span>
-                        </div>
-                      </Link>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
             {[
-              { path: '/games', label: t('games') },
-              { path: '/promotions', label: t('promotions') },
-              { path: '/news', label: t('news') },
-              { path: '/contact', label: t('contact') }
+              { path: '/', label: t('home') || 'Home' },
+              { path: '/games', label: t('games') || 'Game' },
+              { path: '/contact', label: t('contact') || 'Contact' }
             ].map((link) => (
               <NavLink
                 key={link.path}
@@ -227,59 +176,6 @@ const Navbar = () => {
                 )}
               </NavLink>
             ))}
-          </div>
-
-          {/* Autocomplete Search input */}
-          <div className="hidden md:block flex-1 max-w-sm relative" ref={searchRef}>
-            <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input
-                type="text"
-                placeholder="Search games or gift cards..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setShowSearchDropdown(true);
-                }}
-                onFocus={() => setShowSearchDropdown(true)}
-                className="w-full h-10 bg-white/5 hover:bg-white/8 focus:bg-[#0b1023]/60 border border-white/8 focus:border-blue-500/50 rounded-xl pl-10 pr-4 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/20 transition-all"
-              />
-            </div>
-            
-            <AnimatePresence>
-              {showSearchDropdown && searchQuery.trim() !== '' && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute top-12 left-0 right-0 bg-[#0b1023]/95 backdrop-blur-2xl border border-white/8 rounded-2xl p-2 shadow-2xl z-50"
-                >
-                  {filteredGames.length > 0 ? (
-                    filteredGames.map((game) => (
-                      <Link
-                        key={game.slug}
-                        to={`/games/${game.slug}`}
-                        onClick={() => {
-                          setSearchQuery('');
-                          setShowSearchDropdown(false);
-                        }}
-                        className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-all text-left"
-                      >
-                        <img src={game.image} alt={game.name} className="w-8 h-8 rounded-lg object-cover" />
-                        <div>
-                          <p className="text-white font-bold text-xs">{game.name}</p>
-                          <p className="text-[9px] text-slate-500 font-semibold">{game.category}</p>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="py-4 text-center text-slate-500 text-xs font-bold">
-                      No matching games found.
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
 
           {/* Action elements */}
@@ -321,56 +217,6 @@ const Navbar = () => {
               </button>
             </Dropdown>
 
-            {/* Cart Button */}
-            <Link
-              to="/cart"
-              className="relative p-2.5 rounded-xl bg-white/5 border border-white/5 text-slate-400 hover:text-white transition-all select-none"
-            >
-              <ShoppingCart size={17} />
-              {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[9px] font-black h-5 w-5 rounded-full flex items-center justify-center border border-[#050816] shadow-[0_0_8px_#3B82F6] animate-pulse">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-
-            {/* Profile Dropdown with stats */}
-            {isAuthenticated ? (
-              <Dropdown
-                menu={{ items: userMenuItems }}
-                placement="bottomRight"
-                trigger={['click']}
-                overlayClassName="bg-[#0b1023]/95 border border-white/8 rounded-xl shadow-2xl p-1"
-              >
-                <button className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 text-slate-200 hover:text-white transition-all cursor-pointer select-none">
-                  <div className="relative w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-xs font-black text-white shadow-md">
-                    {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                    <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-[#050816]"></span>
-                  </div>
-                  <div className="hidden sm:flex flex-col text-left leading-none">
-                    <span className="text-white font-bold text-xs block max-w-[80px] truncate">{user?.name}</span>
-                    <span className="text-[8px] text-cyan-400 font-semibold block mt-0.5">$25.80 Wallet</span>
-                  </div>
-                  <ChevronDown size={12} className="text-slate-500" />
-                </button>
-              </Dropdown>
-            ) : (
-              <div className="hidden sm:flex items-center gap-3">
-                <Link
-                  to="/login"
-                  className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-all"
-                >
-                  {t('login')}
-                </Link>
-                <Link
-                  to="/register"
-                  className="px-4 py-2 text-xs font-black uppercase tracking-widest bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-500/15 active:scale-95 transition-all border border-blue-500/10"
-                >
-                  {t('register')}
-                </Link>
-              </div>
-            )}
-
             {/* Mobile Sidebar Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -385,24 +231,12 @@ const Navbar = () => {
 
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#050816]/95 backdrop-blur-2xl border-t border-white/5 px-6 py-6 flex flex-col gap-5 animate-fadeIn select-none">
-          {/* Mobile Search input */}
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
-            <input
-              type="text"
-              placeholder="Search game top-ups..."
-              className="w-full h-9 bg-white/5 border border-white/5 rounded-xl pl-9 pr-4 text-xs font-medium text-white placeholder-slate-600 focus:outline-none"
-            />
-          </div>
-
+        <div className="lg:hidden bg-[#050816]/95 backdrop-blur-2xl border-t border-white/5 px-6 py-6 flex flex-col gap-5 animate-fadeIn select-none text-left">
           <div className="flex flex-col gap-4">
             {[
-              { path: '/', label: t('home') },
-              { path: '/games', label: t('games') },
-              { path: '/promotions', label: t('promotions') },
-              { path: '/news', label: t('news') },
-              { path: '/contact', label: t('contact') }
+              { path: '/', label: t('home') || 'Home' },
+              { path: '/games', label: t('games') || 'Game' },
+              { path: '/contact', label: t('contact') || 'Contact' }
             ].map((link) => (
               <NavLink
                 key={link.path}
@@ -445,74 +279,6 @@ const Navbar = () => {
               </button>
             </div>
           </div>
-
-          <div className="h-px bg-white/5"></div>
-
-          {/* User profiles or authentication actions */}
-          {isAuthenticated ? (
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-sm font-extrabold text-white">
-                  {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                </div>
-                <div className="text-left">
-                  <h4 className="text-white font-bold text-sm">{user?.name}</h4>
-                  <p className="text-[10px] text-cyan-400 font-semibold">$25.80 wallet balance</p>
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <Link
-                  to="/profile"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-2.5 text-center bg-white/5 border border-white/5 text-slate-200 rounded-xl text-xs font-bold"
-                >
-                  {t('profile')}
-                </Link>
-                <Link
-                  to="/orders"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-2.5 text-center bg-white/5 border border-white/5 text-slate-200 rounded-xl text-xs font-bold"
-                >
-                  {t('my_orders')}
-                </Link>
-                {isAdmin() && (
-                  <Link
-                    to="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full py-2.5 text-center bg-blue-600/10 border border-blue-500/20 text-blue-400 rounded-xl text-xs font-bold"
-                  >
-                    {t('admin_dashboard')}
-                  </Link>
-                )}
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    handleLogout();
-                  }}
-                  className="w-full py-2.5 text-center bg-red-950/20 border border-red-900/30 rounded-xl text-red-400 text-xs font-bold"
-                >
-                  {t('logout')}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3">
-              <Link
-                to="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-3 text-center text-xs font-extrabold bg-white/5 border border-white/5 text-slate-300 rounded-xl uppercase tracking-wider"
-              >
-                {t('login')}
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-3 text-center text-xs font-black bg-blue-600 text-white rounded-xl uppercase tracking-widest shadow-lg shadow-blue-500/10"
-              >
-                {t('register')}
-              </Link>
-            </div>
-          )}
         </div>
       )}
     </nav>

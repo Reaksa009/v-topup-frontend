@@ -19,13 +19,9 @@ const GameDetail = lazy(() => import('./pages/GameDetail'));
 const Promotions = lazy(() => import('./pages/Promotions'));
 const News = lazy(() => import('./pages/News'));
 const Contact = lazy(() => import('./pages/Contact'));
-const Login = lazy(() => import('./pages/Login'));
-const Register = lazy(() => import('./pages/Register'));
 const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const Success = lazy(() => import('./pages/Success'));
-const Profile = lazy(() => import('./pages/Profile'));
-const Orders = lazy(() => import('./pages/Orders'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 import './App.css';
@@ -84,13 +80,9 @@ function App() {
                       <Route path="/promotions" element={<Promotions />} />
                       <Route path="/news" element={<News />} />
                       <Route path="/contact" element={<Contact />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/register" element={<Register />} />
                       <Route path="/cart" element={<Cart />} />
                       <Route path="/checkout" element={<Checkout />} />
                       <Route path="/success" element={<Success />} />
-                      <Route path="/profile" element={<Profile />} />
-                      <Route path="/orders" element={<Orders />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Suspense>

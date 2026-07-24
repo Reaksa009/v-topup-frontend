@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -13,6 +13,7 @@ const Checkout = () => {
   const { isAuthenticated } = useAuth();
   const { language, t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Step stages: 'review' (Step 1), 'payment_method' (Step 2), 'gateway' (Step 3), 'failed'
   const [step, setStep] = useState('review');
@@ -131,6 +132,49 @@ const Checkout = () => {
     setQrExpired(false);
     setTimeLeft(180);
   }, [paymentMethod, cartItems, coupon]);
+
+  // Auto trigger gateway step if parameter is passed in route state
+  useEffect(() => {
+    if (location.state?.paymentMethod) {
+      const method = location.state.paymentMethod;
+      setPaymentMethod(method);
+
+      if (location.state?.autoTrigger && cartItems.length > 0 && !dynamicQrUrl && timeLeft === 180) {
+        setStep('gateway');
+        if (method === 'khqr_bakong') {
+          const triggerFetch = async () => {
+            setDynamicQrLoading(true);
+            setQrExpired(false);
+            setTimeLeft(180);
+            try {
+              const itemsPayload = cartItems.map((item) => ({
+                game_id: item.game.id,
+                package_id: item.packageItem.id,
+                player_id: item.playerId,
+                server_id: item.serverId,
+                qty: item.qty
+              }));
+
+              const res = await api.post('/payments/generate-khqr', {
+                items: JSON.stringify(itemsPayload),
+                coupon_code: coupon ? coupon.code : null
+              });
+
+              if (res.data?.success && res.data.data?.qr) {
+                setDynamicQrUrl(res.data.data.qr);
+                setDynamicQrMd5(res.data.data.md5);
+              }
+            } catch (err) {
+              console.error('Failed to auto-generate dynamic KHQR:', err);
+            } finally {
+              setDynamicQrLoading(false);
+            }
+          };
+          triggerFetch();
+        }
+      }
+    }
+  }, [location.state, cartItems]);
 
   // Fetch dynamic KHQR code
   const fetchDynamicKhqr = async () => {
