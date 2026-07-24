@@ -28,6 +28,7 @@ const Checkout = () => {
   const [dynamicQrMd5, setDynamicQrMd5] = useState(null);
   const [dynamicQrLoading, setDynamicQrLoading] = useState(false);
   const [paymentVerified, setPaymentVerified] = useState(false);
+  const [checkoutErrorMsg, setCheckoutErrorMsg] = useState(null);
 
   // Timer states for KHQR expiration (3 minutes = 180 seconds)
   const [timeLeft, setTimeLeft] = useState(180);
@@ -205,6 +206,7 @@ const Checkout = () => {
       console.error('Failed to generate dynamic KHQR:', err);
       const errMsg = err.response?.data?.message || 'Failed to generate dynamic KHQR.';
       message.error(errMsg);
+      setCheckoutErrorMsg(errMsg);
       setStep('failed');
     } finally {
       setDynamicQrLoading(false);
@@ -241,12 +243,16 @@ const Checkout = () => {
         clearCart();
         navigate(`/success?order_no=${res.data.data.order_no}`);
       } else {
-        message.error(res.data?.message || 'Failed to place order.');
+        const errMsg = res.data?.message || 'Failed to place order.';
+        message.error(errMsg);
+        setCheckoutErrorMsg(errMsg);
         setStep('failed');
       }
     } catch (err) {
       console.error(err);
-      message.error('Failed to submit order after verification.');
+      const errMsg = err.response?.data?.message || 'Failed to submit order after verification.';
+      message.error(errMsg);
+      setCheckoutErrorMsg(errMsg);
       setStep('failed');
     } finally {
       setSubmitting(false);
@@ -332,12 +338,16 @@ const Checkout = () => {
         clearCart();
         navigate(`/success?order_no=${res.data.data.order_no}`);
       } else {
-        message.error(res.data?.message || 'Failed to place order.');
+        const errMsg = res.data?.message || 'Failed to place order.';
+        message.error(errMsg);
+        setCheckoutErrorMsg(errMsg);
         setStep('failed');
       }
     } catch (err) {
       console.error(err);
-      message.error('Failed to place manual order.');
+      const errMsg = err.response?.data?.message || 'Failed to place manual order.';
+      message.error(errMsg);
+      setCheckoutErrorMsg(errMsg);
       setStep('failed');
     } finally {
       setSubmitting(false);
@@ -745,7 +755,7 @@ const Checkout = () => {
             >
               <AlertCircle size={44} className="text-red-500 mx-auto" />
               <h2 className="text-white font-black text-lg uppercase tracking-wider">{cl('failed_title')}</h2>
-              <p className="text-slate-400 text-xs leading-relaxed">{cl('failed_desc')}</p>
+              <p className="text-slate-400 text-xs leading-relaxed">{checkoutErrorMsg || cl('failed_desc')}</p>
               
               <div className="flex gap-3 pt-2">
                 <button
