@@ -294,9 +294,10 @@ const GameDetail = () => {
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
     const filtered = packages.filter((pkg) => {
-      const isBest = pkg.package_type === 'best_selling' || Boolean(pkg.is_popular) || Boolean(pkg.is_pass);
-      if (tabName === 'best_selling') return isBest;
-      if (tabName === 'normal') return !isBest;
+      if (tabName === 'best_selling') return pkg.category_type === 'best_selling' || Boolean(pkg.is_best_selling) || Boolean(pkg.is_popular);
+      if (tabName === 'normal') return (pkg.category_type === 'normal' || !pkg.category_type) && !pkg.is_best_selling && !pkg.is_popular;
+      if (tabName === 'pass') return pkg.category_type === 'pass' || pkg.category_type === 'weekly' || pkg.category_type === 'monthly' || Boolean(pkg.is_pass);
+      if (tabName === 'event') return pkg.category_type === 'event' || Boolean(pkg.is_event);
       return true;
     });
     if (filtered.length > 0) {
@@ -307,9 +308,10 @@ const GameDetail = () => {
   };
 
   const filteredPackages = packages.filter((pkg) => {
-    const isBest = pkg.package_type === 'best_selling' || Boolean(pkg.is_popular) || Boolean(pkg.is_pass);
-    if (activeTab === 'best_selling') return isBest;
-    if (activeTab === 'normal') return !isBest;
+    if (activeTab === 'best_selling') return pkg.category_type === 'best_selling' || Boolean(pkg.is_best_selling) || Boolean(pkg.is_popular);
+    if (activeTab === 'normal') return (pkg.category_type === 'normal' || !pkg.category_type) && !pkg.is_best_selling && !pkg.is_popular;
+    if (activeTab === 'pass') return pkg.category_type === 'pass' || pkg.category_type === 'weekly' || pkg.category_type === 'monthly' || Boolean(pkg.is_pass);
+    if (activeTab === 'event') return pkg.category_type === 'event' || Boolean(pkg.is_event);
     return true;
   });
 
@@ -522,7 +524,7 @@ const GameDetail = () => {
                 </div>
 
                 {/* Package Type Category Tabs */}
-                <div className="flex gap-1.5 p-1 bg-[#050816]/65 border border-white/5 rounded-xl w-max shrink-0 select-none">
+                <div className="flex flex-wrap gap-1.5 p-1 bg-[#050816]/65 border border-white/5 rounded-xl shrink-0 select-none">
                   <button
                     type="button"
                     onClick={() => handleTabChange('all')}
@@ -554,7 +556,29 @@ const GameDetail = () => {
                         : 'text-slate-500 hover:text-white'
                     }`}
                   >
-                    Normal
+                    💎 Normal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange('pass')}
+                    className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg transition-smooth cursor-pointer ${
+                      activeTab === 'pass'
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-650 text-white shadow-md'
+                        : 'text-slate-500 hover:text-white'
+                    }`}
+                  >
+                    🎫 Passes & Subs
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange('event')}
+                    className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg transition-smooth cursor-pointer ${
+                      activeTab === 'event'
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
+                        : 'text-slate-500 hover:text-white'
+                    }`}
+                  >
+                    🎉 Events
                   </button>
                 </div>
               </div>
