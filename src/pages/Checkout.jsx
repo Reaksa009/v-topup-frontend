@@ -161,7 +161,8 @@ const Checkout = () => {
               });
 
               if (res.data?.success && res.data.data?.qr) {
-                setDynamicQrUrl(res.data.data.qr);
+                const qrSecure = String(res.data.data.qr).replace(/^http:\/\//i, 'https://');
+                setDynamicQrUrl(qrSecure);
                 setDynamicQrMd5(res.data.data.md5);
               }
             } catch (err) {
@@ -196,7 +197,8 @@ const Checkout = () => {
       });
 
       if (res.data?.success && res.data.data?.qr) {
-        setDynamicQrUrl(res.data.data.qr);
+        const qrSecure = String(res.data.data.qr).replace(/^http:\/\//i, 'https://');
+        setDynamicQrUrl(qrSecure);
         setDynamicQrMd5(res.data.data.md5);
       }
     } catch (err) {
